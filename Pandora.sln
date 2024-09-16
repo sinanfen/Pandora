@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35201.131
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F7E09A01-0AC4-4D7B-928E-82A323ABC105}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.API", "Pandora.API\Pandora.API.csproj", "{32622C91-115B-4EE0-9106-37CF923657A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.Core", "Pandora.Core\Pandora.Core.csproj", "{A9523210-2A2C-429C-AD47-E795EB2653D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.Infrastructure", "Pandora.Infrastructure\Pandora.Infrastructure.csproj", "{A419CAFE-8285-4F92-90CE-254E6B4D0933}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.Application", "Pandora.Application\Pandora.Application.csproj", "{7929418A-A481-4E5D-9F54-DCDFD870F0DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.CrossCuttingConcerns", "Pandora.CrossCuttingConcerns\Pandora.CrossCuttingConcerns.csproj", "{C874A04D-26D6-4305-839B-0FF37956D41A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32622C91-115B-4EE0-9106-37CF923657A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32622C91-115B-4EE0-9106-37CF923657A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32622C91-115B-4EE0-9106-37CF923657A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32622C91-115B-4EE0-9106-37CF923657A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9523210-2A2C-429C-AD47-E795EB2653D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9523210-2A2C-429C-AD47-E795EB2653D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9523210-2A2C-429C-AD47-E795EB2653D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9523210-2A2C-429C-AD47-E795EB2653D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A419CAFE-8285-4F92-90CE-254E6B4D0933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A419CAFE-8285-4F92-90CE-254E6B4D0933}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A419CAFE-8285-4F92-90CE-254E6B4D0933}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A419CAFE-8285-4F92-90CE-254E6B4D0933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7929418A-A481-4E5D-9F54-DCDFD870F0DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7929418A-A481-4E5D-9F54-DCDFD870F0DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7929418A-A481-4E5D-9F54-DCDFD870F0DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7929418A-A481-4E5D-9F54-DCDFD870F0DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C874A04D-26D6-4305-839B-0FF37956D41A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C874A04D-26D6-4305-839B-0FF37956D41A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C874A04D-26D6-4305-839B-0FF37956D41A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C874A04D-26D6-4305-839B-0FF37956D41A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{32622C91-115B-4EE0-9106-37CF923657A9} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
+		{A9523210-2A2C-429C-AD47-E795EB2653D5} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
+		{A419CAFE-8285-4F92-90CE-254E6B4D0933} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
+		{7929418A-A481-4E5D-9F54-DCDFD870F0DC} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
+		{C874A04D-26D6-4305-839B-0FF37956D41A} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AB61A51B-C04F-4D6E-91FD-A37760A7D9FA}
+	EndGlobalSection
+EndGlobal
