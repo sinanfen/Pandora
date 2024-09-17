@@ -2,17 +2,17 @@ using Microsoft.EntityFrameworkCore;
 using Pandora.Infrastructure.Data.Contexts;
 using Pandora.Application.Extensions;
 using Pandora.Infrastructure.Extensions;
+using Microsoft.Extensions.Configuration;
+using Serilog;
+using Serilog.Sinks.PostgreSQL;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 
-// Register services from different layers
-builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
+builder.Services.AddApplicationServices();
 //builder.Services.AddCoreServices();
 //builder.Services.AddCrossCuttingConcernsServices();
 
@@ -21,6 +21,24 @@ builder.Services.AddDbContext<PandoraDbContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+Log.Logger = new LoggerConfiguration()
+           .ReadFrom.Configuration(builder.Configuration) // appsettings.json'dan okur
+           .Enrich.FromLogContext() // Ek log bilgilerini dahil eder
+           .WriteTo.Console() // Loglarý konsola yazdýrýr
+           .WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
+         .WriteTo.PostgreSQL(builder.Configuration.GetConnectionString("PandoraBoxDatabase"), "Logs", needAutoCreateTable: true,
+        columnOptions: new Dictionary<string, ColumnWriterBase>
+        {
+            {"message", new RenderedMessageColumnWriter()},
+            {"message_template", new MessageTemplateColumnWriter()},
+            {"level", new LevelColumnWriter()},
+            {"time_stamp", new TimestampColumnWriter()},
+            {"exception", new ExceptionColumnWriter()},
+            {"log_event", new LogEventSerializedColumnWriter()},
+        })
+           .Enrich.FromLogContext()
+           .CreateLogger();
 
 var app = builder.Build();
 
