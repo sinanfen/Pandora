@@ -18,6 +18,8 @@ public class CategoryConfiguration : BaseEntityConfiguration<Category, Guid>
                .IsRequired()
                .HasMaxLength(256); // Limit category name length to 256 characters
 
+        builder.HasIndex(c => c.Name).IsUnique();
+
         builder.Property(c => c.Description)
                .HasMaxLength(512); // Optional description with a max length of 512 characters
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pandora.Infrastructure.Data.Contexts;
@@ -11,9 +12,11 @@ using Pandora.Infrastructure.Data.Contexts;
 namespace Pandora.Infrastructure.Migrations
 {
     [DbContext(typeof(PandoraDbContext))]
-    partial class PandoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240917223826_CategoryNameSetUnique")]
+    partial class CategoryNameSetUnique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
