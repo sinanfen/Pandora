@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Pandora.Infrastructure.Data.Contexts;
 using Pandora.Application.Extensions;
 using Pandora.Infrastructure.Extensions;
-using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Sinks.PostgreSQL;
 

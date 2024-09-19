@@ -27,14 +27,31 @@ namespace Pandora.API.Controllers
                 Password = "SinanFen123#",
                 ConfirmPassword = "SinanFen123#",
                 PhoneNumber = "123-456-7890",
-                UserType = UserType.Individual, 
+                UserType = UserType.Individual,
                 FirstName = "Test",
                 LastName = "User"
             };
 
-            var result = await _userService.RegisterUserAsync(userRegisterDto);
+            var cts = new CancellationTokenSource();
+            var result = await _userService.RegisterUserAsync(userRegisterDto, cts.Token);
 
             return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterAsync(UserRegisterDto userRegisterDto)
+        {
+            var cts = new CancellationTokenSource();
+            var result = await _userService.RegisterUserAsync(userRegisterDto, cts.Token);
+            return Ok(result);
+        }
+
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAllAsync()
+        {
+            var cts = new CancellationTokenSource();
+            var data = await _userService.GetAllAsync(cts.Token);
+            return Ok(data);
         }
     }
 }

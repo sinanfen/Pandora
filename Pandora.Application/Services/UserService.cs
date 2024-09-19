@@ -13,6 +13,10 @@ using Pandora.Core.Domain.Entities;
 using System.Security.Authentication;
 using FluentValidation;
 using Pandora.Application.BusinessRules;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
+using Pandora.Core.Persistence.Paging;
+using Pandora.Core.Domain.Paging;
 
 public class UserService : IUserService
 {
@@ -35,7 +39,7 @@ public class UserService : IUserService
         _logger = logger;
     }
 
-    public async Task<UserDto> GetByEmailAsync(string email)
+    public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
         try
         {
@@ -56,7 +60,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<UserDto> GetByUsernameAsync(string username)
+    public async Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
     {
         try
         {
@@ -77,38 +81,46 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<IDataResult<UserDto>> RegisterUserAsync(UserRegisterDto dto)
+    public async Task<IDataResult<UserDto>> RegisterUserAsync(UserRegisterDto dto, CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(dto);
-        if (!validationResult.IsValid)
+        try
         {
-            return new DataResult<UserDto>(ResultStatus.Error, "Doğrulama hatası: " +
-                string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
+            var validationResult = await _validator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return new DataResult<UserDto>(ResultStatus.Error, "Doğrulama hatası: " +
+                    string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
+            }
+
+            await _userBusinessRules.UserNameCannotBeDuplicatedWhenInserted(dto.Username);
+            await _userBusinessRules.EmailCannotBeDuplicatedWhenInserted(dto.Email);
+
+            User user;
+            if (dto.UserType == UserType.Individual)
+                user = _mapper.Map<IndividualUser>(dto);
+            else if (dto.UserType == UserType.Corporate)
+                user = _mapper.Map<CorporateUser>(dto);
+            else
+                return new DataResult<UserDto>(ResultStatus.Error, "Geçersiz kullanıcı türü", null);
+
+            user.NormalizedUsername = dto.Username.ToUpperInvariant();
+            user.NormalizedEmail = dto.Email.ToUpperInvariant();
+            user.SecurityStamp = Guid.NewGuid().ToString();
+            user.PasswordHash = _hasher.HashPassword(dto.Password, HashAlgorithmType.Sha512);
+
+            await _userRepository.AddAsync(user, cancellationToken);
+
+            return new DataResult<UserDto>(ResultStatus.Success, "Kullanıcı başarıyla kaydedildi.", _mapper.Map<UserDto>(user));
         }
-
-        await _userBusinessRules.UserNameCannotBeDuplicatedWhenInserted(dto.Username);
-        await _userBusinessRules.EmailCannotBeDuplicatedWhenInserted(dto.Email);
-
-        User user;
-        if (dto.UserType == UserType.Individual)
-            user = _mapper.Map<IndividualUser>(dto);
-        else if (dto.UserType == UserType.Corporate)
-            user = _mapper.Map<CorporateUser>(dto);
-        else
-            return new DataResult<UserDto>(ResultStatus.Error, "Geçersiz kullanıcı türü", null);
-
-        user.NormalizedUsername = dto.Username.ToUpperInvariant();
-        user.NormalizedEmail = dto.Email.ToUpperInvariant();
-        user.SecurityStamp = Guid.NewGuid().ToString();
-        user.PasswordHash = _hasher.HashPassword(dto.Password, HashAlgorithmType.Sha512);
-
-        await _userRepository.AddAsync(user);
-
-        return new DataResult<UserDto>(ResultStatus.Success, "Kullanıcı başarıyla kaydedildi.", _mapper.Map<UserDto>(user));
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to register the user. Details: {ExceptionMessage}", nameof(RegisterUserAsync), ex.Message);
+            return new DataResult<UserDto>(ResultStatus.Error, ex.Message, null);
+        }
     }
 
 
-    public async Task<IDataResult<UserDto>> UpdateUserAsync(UserUpdateDto dto)
+    public async Task<IDataResult<UserDto>> UpdateUserAsync(UserUpdateDto dto, CancellationToken cancellationToken)
     {
         try
         {
@@ -140,5 +152,53 @@ public class UserService : IUserService
     {
         var result = _hasher.VerifyHashedPassword(hashedPassword, password, HashAlgorithmType.Sha512);
         return Task.FromResult(result);
+    }
+
+    public async Task<UserDto?> GetAsync(Expression<Func<User, bool>> predicate, Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null, bool withDeleted = false, bool enableTracking = true, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            User? user = await _userRepository.GetAsync(predicate, include, withDeleted, enableTracking, cancellationToken);
+            return _mapper.Map<UserDto>(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get user. Details: {ExceptionMessage}", nameof(GetAsync), ex.Message);
+            return null;
+        }
+    }
+
+    public async Task<Paginate<UserDto>?> GetListAsync(Expression<Func<User, bool>>? predicate = null, Func<IQueryable<User>, IOrderedQueryable<User>>? orderBy = null, Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            IPaginate<User> userList = await _userRepository.GetListAsync(predicate, orderBy, include, index, size, withDeleted, enableTracking, cancellationToken);
+            return _mapper.Map<Paginate<UserDto>>(userList);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get paged list of user. Details: {ExceptionMessage}", nameof(GetListAsync), ex.Message);
+            return null;
+        }
+    }
+
+    public Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false)
+    {
+        try
+        {
+            var pagedData = await _userRepository.GetListAsync(cancellationToken: cancellationToken);
+            var userDtos = _mapper.Map<List<UserDto>>(pagedData.Items);
+            return userDtos;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get list of user. Details: {ExceptionMessage}", nameof(GetAllAsync), ex.Message);
+            return null;
+        }
     }
 }
