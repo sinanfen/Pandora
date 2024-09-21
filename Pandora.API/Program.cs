@@ -4,6 +4,7 @@ using Pandora.Application.Extensions;
 using Pandora.Infrastructure.Extensions;
 using Serilog;
 using Serilog.Sinks.PostgreSQL;
+using Serilog.Events;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,23 +22,26 @@ builder.Services.AddDbContext<PandoraDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Serilog configuration
 Log.Logger = new LoggerConfiguration()
-           .ReadFrom.Configuration(builder.Configuration) // appsettings.json'dan okur
-           .Enrich.FromLogContext() // Ek log bilgilerini dahil eder
-           .WriteTo.Console() // Loglarý konsola yazdýrýr
-           .WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
-         .WriteTo.PostgreSQL(builder.Configuration.GetConnectionString("PandoraBoxDatabase"), "Logs", needAutoCreateTable: true,
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.PostgreSQL(builder.Configuration.GetConnectionString("PandoraBoxDatabase"), "Logs", needAutoCreateTable: true,
         columnOptions: new Dictionary<string, ColumnWriterBase>
         {
-            {"message", new RenderedMessageColumnWriter()},
-            {"message_template", new MessageTemplateColumnWriter()},
-            {"level", new LevelColumnWriter()},
-            {"time_stamp", new TimestampColumnWriter()},
-            {"exception", new ExceptionColumnWriter()},
-            {"log_event", new LogEventSerializedColumnWriter()},
-        })
-           .Enrich.FromLogContext()
-           .CreateLogger();
+            {"Message", new RenderedMessageColumnWriter()},
+            {"MessageTemplate", new MessageTemplateColumnWriter()},
+            {"Level", new LevelColumnWriter()},
+            {"TimeStamp", new TimestampColumnWriter()},
+            {"Exception", new ExceptionColumnWriter()},
+            {"LogEvent", new LogEventSerializedColumnWriter()},        
+        })  
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
