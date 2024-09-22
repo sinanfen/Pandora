@@ -4,7 +4,6 @@ using Pandora.Application.Utilities.Results.Interfaces;
 using Pandora.Core.Domain.Entities;
 using Pandora.Core.Persistence.Paging;
 using System.Linq.Expressions;
-using System.Reflection.Metadata;
 
 namespace Pandora.Application.Interfaces;
 
@@ -27,6 +26,8 @@ public interface IUserService
       CancellationToken cancellationToken = default);
     Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken);
     Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken);
+    Task<User?> GetEntityByEmailAsync(string email, CancellationToken cancellationToken);
+    Task<User?> GetEntityByUsernameAsync(string username, CancellationToken cancellationToken);
     Task<IDataResult<UserDto>> RegisterUserAsync(UserRegisterDto dto,CancellationToken cancellationToken);
     Task<IDataResult<UserDto>> UpdateUserAsync(UserUpdateDto dto, CancellationToken cancellationToken);
     Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken);

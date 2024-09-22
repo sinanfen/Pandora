@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Pandora.Application.DTOs.UserDTOs;
 using Pandora.Application.Interfaces.Repositories;
@@ -17,6 +16,8 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using Pandora.Core.Persistence.Paging;
 using Pandora.Core.Domain.Paging;
+
+namespace Pandora.Application.Services;
 
 public class UserService : IUserService
 {
@@ -60,7 +61,47 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<UserDto?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
+    public async Task<UserDto?> GetByUsernameAsync(string username, CancellationToken token)
+    {
+        try
+        {
+            var user = await _userRepository.GetByUsernameAsync(username);
+            if (user == null)
+            {
+                _logger.LogWarning("Kullanıcı bulunamadı: {Username}", username);
+                return null;
+            }
+            var userDto = _mapper.Map<UserDto>(user);
+            return userDto;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get user by username {Username}. Details: {ExceptionMessage}", nameof(GetByUsernameAsync), username, ex.Message);
+            throw new Exception("Kullanıcı bilgisi alınırken hata oluştu.", ex);
+        }
+    }
+
+    public async Task<User?> GetEntityByEmailAsync(string email, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null)
+            {
+                _logger.LogWarning("Kullanıcı bulunamadı: {Email}", email);
+                return null;
+            }
+
+            return user;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get user by email {Email}. Details: {ExceptionMessage}", nameof(GetEntityByEmailAsync), email, ex.Message);
+            throw new Exception("Kullanıcı bilgisi alınırken hata oluştu.", ex);
+        }
+    }
+
+    public async Task<User?> GetEntityByUsernameAsync(string username, CancellationToken cancellationToken)
     {
         try
         {
@@ -71,12 +112,11 @@ public class UserService : IUserService
                 return null;
             }
 
-            var userDto = _mapper.Map<UserDto>(user);
-            return userDto;
+            return user;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {MethodName}. Failed to get user by username {Username}. Details: {ExceptionMessage}", nameof(GetByUsernameAsync), username, ex.Message);
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get user by username {Username}. Details: {ExceptionMessage}", nameof(GetEntityByUsernameAsync), username, ex.Message);
             throw new Exception("Kullanıcı bilgisi alınırken hata oluştu.", ex);
         }
     }
