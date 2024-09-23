@@ -43,7 +43,7 @@ public class AuthService : IAuthService
             {
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.UserType.ToString()) 
+            new Claim(ClaimTypes.Role, user.UserType.ToString())
             }),
             Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:ExpiresInMinutes"])),
             Issuer = _configuration["JwtSettings:Issuer"], // Issuer (token'ı oluşturan taraf)

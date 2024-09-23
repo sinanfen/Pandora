@@ -241,4 +241,9 @@ public class UserService : IUserService
             return null;
         }
     }
+
+    public Task<IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }
