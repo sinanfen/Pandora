@@ -1,6 +1,6 @@
 ﻿using Pandora.Core.Domain.Constants.Enums;
 using Pandora.Application.DTOs.PasswordVaultDTOs;
-using Pandora.Application.DTOs.PandoraBoxDTOs;
+using Pandora.Application.DTOs.PersonalVaultDTOs;
 
 namespace Pandora.Application.DTOs.UserDTOs;
 
@@ -31,12 +31,12 @@ public class UserDto : BaseDto<Guid>
 
     // Navigation Properties - Password Vaults and Pandora Boxes
     public List<PasswordVaultDto> PasswordVaults { get; set; } = new List<PasswordVaultDto>();
-    public List<PandoraBoxDto> PandoraBoxes { get; set; } = new List<PandoraBoxDto>();
+    public List<PersonalVaultDto> PersonalVaults { get; set; } = new List<PersonalVaultDto>();
 
     // Additional Fields for Frontend Display
     public bool IsLockedOut => LockoutEnd.HasValue && LockoutEnd > DateTime.UtcNow;
     public int TotalVaults => PasswordVaults?.Count ?? 0; // Total number of password vaults
-    public int TotalPandoraBoxes => PandoraBoxes?.Count ?? 0; // Total number of Pandora box entries
+    public int TotalPersonalVaults => PersonalVaults?.Count ?? 0; // Total number of Pandora box entries
 
     // Display-friendly full name (for individual users)
     public string FullName => $"{FirstName} {LastName}".Trim();

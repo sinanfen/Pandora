@@ -8,11 +8,11 @@ public class Category : Entity<Guid>
 
     // Navigation properties to link with vaults and Pandora's boxes
     public ICollection<PasswordVault> PasswordVaults { get; set; }
-    public ICollection<PandoraBox> PandoraBoxes { get; set; }
+    public ICollection<PersonalVault> PersonalVaults { get; set; }
 
     public Category() : base(Guid.NewGuid())
     {
         PasswordVaults = new List<PasswordVault>();
-        PandoraBoxes = new List<PandoraBox>();
+        PersonalVaults = new List<PersonalVault>();
     }
 }

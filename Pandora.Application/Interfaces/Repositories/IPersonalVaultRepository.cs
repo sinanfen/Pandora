@@ -3,7 +3,7 @@ using Pandora.Core.Domain.Interfaces;
 
 namespace Pandora.Application.Interfaces.Repositories;
 
-public interface IPandoraBoxRepository: IAsyncRepository<PandoraBox, Guid>, IRepository<PandoraBox, Guid>
+public interface IPersonalVaultRepository: IAsyncRepository<PersonalVault, Guid>, IRepository<PersonalVault, Guid>
 {
 
 }

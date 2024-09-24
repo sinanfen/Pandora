@@ -61,7 +61,7 @@ namespace Pandora.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PandoraBoxes",
+                name: "PersonalVaults",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -82,15 +82,15 @@ namespace Pandora.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PandoraBoxes", x => x.Id);
+                    table.PrimaryKey("PK_PersonalVaults", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PandoraBoxes_Categories_CategoryId",
+                        name: "FK_PersonalVaults_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_PandoraBoxes_Users_UserId",
+                        name: "FK_PersonalVaults_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -132,13 +132,13 @@ namespace Pandora.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PandoraBoxes_CategoryId",
-                table: "PandoraBoxes",
+                name: "IX_PersonalVaults_CategoryId",
+                table: "PersonalVaults",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PandoraBoxes_UserId",
-                table: "PandoraBoxes",
+                name: "IX_PersonalVaults_UserId",
+                table: "PersonalVaults",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -168,7 +168,7 @@ namespace Pandora.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PandoraBoxes");
+                name: "PersonalVaults");
 
             migrationBuilder.DropTable(
                 name: "PasswordVaults");

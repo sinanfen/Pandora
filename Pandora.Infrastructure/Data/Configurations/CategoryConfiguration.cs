@@ -29,9 +29,9 @@ public class CategoryConfiguration : BaseEntityConfiguration<Category, Guid>
                .HasForeignKey(pv => pv.CategoryId)
                .OnDelete(DeleteBehavior.SetNull); // Optional category for PasswordVaults
 
-        builder.HasMany(c => c.PandoraBoxes)
+        builder.HasMany(c => c.PersonalVaults)
                .WithOne(pb => pb.Category)
                .HasForeignKey(pb => pb.CategoryId)
-               .OnDelete(DeleteBehavior.SetNull); // Optional category for PandoraBoxes
+               .OnDelete(DeleteBehavior.SetNull); // Optional category for PersonalVaults
     }
 }

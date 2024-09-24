@@ -1,7 +1,7 @@
 ﻿
-namespace Pandora.Application.DTOs.PandoraBoxDTOs;
+namespace Pandora.Application.DTOs.PersonalVaultDTOs;
 
-public class PandoraBoxDto : BaseDto<Guid>
+public class PersonalVaultDto : BaseDto<Guid>
 {
     // User details
     public Guid UserId { get; set; }

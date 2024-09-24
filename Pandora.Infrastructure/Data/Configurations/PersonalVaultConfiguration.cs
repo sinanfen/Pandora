@@ -2,15 +2,15 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pandora.Core.Domain.Entities;
 
-public class PandoraBoxConfiguration : BaseEntityConfiguration<PandoraBox, Guid>
+public class PersonalVaultConfiguration : BaseEntityConfiguration<PersonalVault, Guid>
 {
-    public void Configure(EntityTypeBuilder<PandoraBox> builder)
+    public void Configure(EntityTypeBuilder<PersonalVault> builder)
     {
         // Call the base configuration for common fields
         base.Configure(builder);
 
         // Table name and primary key
-        builder.ToTable("PandoraBoxes");
+        builder.ToTable("PersonalVaults");
         builder.HasKey(pb => pb.Id);
 
         // Properties
@@ -41,11 +41,11 @@ public class PandoraBoxConfiguration : BaseEntityConfiguration<PandoraBox, Guid>
 
         // Relationships
         builder.HasOne(pb => pb.User)
-               .WithMany(u => u.PandoraBoxes)
+               .WithMany(u => u.PersonalVaults)
                .HasForeignKey(pb => pb.UserId);
 
         builder.HasOne(pb => pb.Category)
-               .WithMany(c => c.PandoraBoxes)
+               .WithMany(c => c.PersonalVaults)
                .HasForeignKey(pb => pb.CategoryId)
                .OnDelete(DeleteBehavior.SetNull); // Optional category, set null on delete
 

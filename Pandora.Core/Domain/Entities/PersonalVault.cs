@@ -1,7 +1,7 @@
 ﻿namespace Pandora.Core.Domain.Entities;
 
-// Core/Domain/Entities/PandoraBox.cs
-public class PandoraBox : Entity<Guid>
+// Core/Domain/Entities/PersonalVault.cs
+public class PersonalVault : Entity<Guid>
 {
     public Guid UserId { get; set; }
     public User User { get; set; }
@@ -38,7 +38,7 @@ public class PandoraBox : Entity<Guid>
     public Guid? CategoryId { get; set; }
     public Category Category { get; set; }
 
-    public PandoraBox() : base(Guid.NewGuid())
+    public PersonalVault() : base(Guid.NewGuid())
     {
         Tags = new List<string>();
         CreatedDate = DateTime.UtcNow;

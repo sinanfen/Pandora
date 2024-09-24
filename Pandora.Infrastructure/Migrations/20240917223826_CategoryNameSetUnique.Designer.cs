@@ -128,7 +128,7 @@ namespace Pandora.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PandoraBoxes");
+                    b.ToTable("PersonalVaults");
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.PasswordVault", b =>
@@ -315,12 +315,12 @@ namespace Pandora.Infrastructure.Migrations
             modelBuilder.Entity("Pandora.Core.Domain.Entities.PandoraBox", b =>
                 {
                     b.HasOne("Pandora.Core.Domain.Entities.Category", "Category")
-                        .WithMany("PandoraBoxes")
+                        .WithMany("PersonalVaults")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Pandora.Core.Domain.Entities.User", "User")
-                        .WithMany("PandoraBoxes")
+                        .WithMany("PersonalVaults")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -350,14 +350,14 @@ namespace Pandora.Infrastructure.Migrations
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.Category", b =>
                 {
-                    b.Navigation("PandoraBoxes");
+                    b.Navigation("PersonalVaults");
 
                     b.Navigation("PasswordVaults");
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.User", b =>
                 {
-                    b.Navigation("PandoraBoxes");
+                    b.Navigation("PersonalVaults");
 
                     b.Navigation("PasswordVaults");
                 });

@@ -12,7 +12,7 @@ public static class InfrastructureServicesExtension
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IPasswordVaultRepository, PasswordVaultRepository>();
-        services.AddScoped<IPandoraBoxRepository, PandoraBoxRepository>();
+        services.AddScoped<IPersonalVaultRepository, PersonalVaultRepository>();
 
         return services;
     }

@@ -5,11 +5,11 @@ using Pandora.Infrastructure.Repositories.Generic;
 
 namespace Pandora.Infrastructure.Repositories;
 
-public class PandoraBoxRepository : EfRepositoryBase<PandoraBox, Guid, PandoraDbContext>, IPandoraBoxRepository
+public class PersonalVaultRepository : EfRepositoryBase<PersonalVault, Guid, PandoraDbContext>, IPersonalVaultRepository
 {
     private readonly PandoraDbContext _context;
 
-    public PandoraBoxRepository(PandoraDbContext context) : base(context)
+    public PersonalVaultRepository(PandoraDbContext context) : base(context)
     {
         _context = context;
     }

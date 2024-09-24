@@ -12,7 +12,7 @@ public class PandoraDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<PasswordVault> passwordVaults { get; set; }
-    public DbSet<PandoraBox> PandoraBoxes { get; set; }
+    public DbSet<PersonalVault> PersonalVaults { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

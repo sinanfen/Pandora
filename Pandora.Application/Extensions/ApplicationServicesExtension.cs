@@ -17,11 +17,12 @@ public static class ApplicationServicesExtension
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IPasswordVaultService, PasswordVaultService>();
-        services.AddScoped<IPandoraBoxService, PandoraBoxService>();
+        services.AddScoped<IPersonalVaultService, PersonalVaultService>();
 
         services.AddScoped<IHasher, SecurityService>();
         services.AddScoped<IEncryption, SecurityService>();
         services.AddScoped<UserBusinessRules>();
+        services.AddScoped<CategoryBusinessRules>();
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 

@@ -1,7 +1,7 @@
 ﻿
-namespace Pandora.Application.DTOs.PandoraBoxDTOs;
+namespace Pandora.Application.DTOs.PersonalVaultDTOs;
 
-public class PandoraBoxAddDto
+public class PersonalVaultAddDto
 {
     // User details
     public Guid UserId { get; set; }  // The user creating the box

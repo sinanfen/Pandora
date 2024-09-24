@@ -26,18 +26,20 @@ public class UserService : IUserService
     private readonly IEncryption _encryption;
     private readonly IMapper _mapper;
     private readonly UserBusinessRules _userBusinessRules;
-    private readonly IValidator<UserRegisterDto> _validator;
+    private readonly IValidator<UserRegisterDto> _userRegisterDtoValidator;
+    private readonly IValidator<UserUpdateDto> _userUpdateDtoValidator;
     private readonly ILogger<UserService> _logger;
 
-    public UserService(IUserRepository userRepository, IHasher hasher, IEncryption encryption, IMapper mapper, UserBusinessRules userBusinessRules, IValidator<UserRegisterDto> validator, ILogger<UserService> logger)
+    public UserService(IUserRepository userRepository, IHasher hasher, IEncryption encryption, IMapper mapper, UserBusinessRules userBusinessRules, ILogger<UserService> logger, IValidator<UserRegisterDto> userRegisterDtoValidator, IValidator<UserUpdateDto> userUpdateDtoValidator)
     {
         _userRepository = userRepository;
         _hasher = hasher;
         _encryption = encryption;
         _mapper = mapper;
         _userBusinessRules = userBusinessRules;
-        _validator = validator;
         _logger = logger;
+        _userRegisterDtoValidator = userRegisterDtoValidator;
+        _userUpdateDtoValidator = userUpdateDtoValidator;
     }
 
     public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken)
@@ -125,7 +127,7 @@ public class UserService : IUserService
     {
         try
         {
-            var validationResult = await _validator.ValidateAsync(dto);
+            var validationResult = await _userRegisterDtoValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
                 return new DataResult<UserDto>(ResultStatus.Error, "Doğrulama hatası: " +
@@ -164,6 +166,16 @@ public class UserService : IUserService
     {
         try
         {
+            var validationResult = await _userUpdateDtoValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return new DataResult<UserDto>(ResultStatus.Error, "Doğrulama hatası: " +
+                    string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
+            }
+
+            await _userBusinessRules.UserNameCannotBeDuplicatedWhenUpdated(dto.Id, dto.Username);
+            await _userBusinessRules.EmailCannotBeDuplicatedWhenUpdated(dto.Id, dto.Username);
+
             var user = await _userRepository.GetAsync(u => u.Id == dto.Id);
             if (user == null)
             {
@@ -180,6 +192,25 @@ public class UserService : IUserService
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to update user. Details: {ExceptionMessage}", nameof(UpdateUserAsync), ex.Message);
             return new DataResult<UserDto>(ResultStatus.Error, "Kullanıcı güncellenirken hata oluştu.", data: null, ex);
+        }
+    }
+
+    public async Task<IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            User? user = await _userRepository.GetAsync(x => x.Id == userId, cancellationToken: cancellationToken);
+            if (user == null)
+            {
+                return new Result(ResultStatus.Warning, "Kullanıcı bulunamadı.");
+            }
+            await _userRepository.DeleteAsync(user, cancellationToken: cancellationToken);
+            return new Result(ResultStatus.Success, "Kullanıcı başarıyla silindi.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get user. Details: {ExceptionMessage}", nameof(GetByIdAsync), ex.Message);
+            return new Result(ResultStatus.Error, "Failed to get user.", ex);
         }
     }
 
@@ -222,9 +253,18 @@ public class UserService : IUserService
         }
     }
 
-    public Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            User? user = await _userRepository.GetAsync(x => x.Id == userId, cancellationToken: cancellationToken);
+            return _mapper.Map<UserDto>(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get user. Details: {ExceptionMessage}", nameof(GetByIdAsync), ex.Message);
+            return null;
+        }
     }
 
     public async Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false)
@@ -240,10 +280,5 @@ public class UserService : IUserService
             _logger.LogError(ex, "Error in {MethodName}. Failed to get list of user. Details: {ExceptionMessage}", nameof(GetAllAsync), ex.Message);
             return null;
         }
-    }
-
-    public Task<IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }
