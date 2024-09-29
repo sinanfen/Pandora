@@ -1,7 +1,7 @@
 ﻿
 namespace Pandora.Application.DTOs.PasswordVaultDTOs;
 
-public class PasswordVaultAddDto
+public class PasswordVaultAddDto : IPasswordVaultDto
 {
     // User details
     public Guid UserId { get; set; }  // The user who adds the vault
@@ -10,9 +10,10 @@ public class PasswordVaultAddDto
     public string SiteName { get; set; }  // e.g., "Facebook"
     public string UsernameOrEmail { get; set; }  // Username or email (to be AES-encrypted)
     public string Password { get; set; }  // Password (to be hashed)
+    public string PasswordRepeat { get; set; }  // Password repeat
     public string Notes { get; set; }  // Optional notes (to be AES-encrypted)
     public DateTime? PasswordExpirationDate { get; set; }  // Optional expiration date for the password
 
     // Category
-    public Guid? CategoryId { get; set; }  // Optional category assignment
+    public Guid CategoryId { get; set; }  // category assignment
 }

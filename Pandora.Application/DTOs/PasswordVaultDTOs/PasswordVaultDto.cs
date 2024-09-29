@@ -5,7 +5,6 @@ public class PasswordVaultDto : BaseDto<Guid>
 {
     // User details
     public Guid UserId { get; set; }
-    public string Username { get; set; }  // Optionally display the username
 
     // Vault details
     public string SecureSiteName { get; set; }  // e.g., "Facebook"
@@ -16,5 +15,4 @@ public class PasswordVaultDto : BaseDto<Guid>
 
     // Category details
     public Guid? CategoryId { get; set; }
-    public string CategoryName { get; set; }  // Category name, if exists
 }
