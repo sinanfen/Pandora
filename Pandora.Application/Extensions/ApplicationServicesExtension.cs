@@ -24,6 +24,7 @@ public static class ApplicationServicesExtension
         services.AddScoped<UserBusinessRules>();
         services.AddScoped<CategoryBusinessRules>();
         services.AddScoped<PersonalVaultBusinessRules>();
+        services.AddScoped<PasswordVaultBusinessRules>();
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 

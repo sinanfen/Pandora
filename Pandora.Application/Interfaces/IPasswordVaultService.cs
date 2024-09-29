@@ -24,9 +24,11 @@ CancellationToken cancellationToken = default);
       bool withDeleted = false,
       bool enableTracking = true,
       CancellationToken cancellationToken = default);
-    Task<IDataResult<PasswordVaultDto>> AddAsync(PasswordVaultUpdateDto dto, CancellationToken cancellationToken);
+    Task<IDataResult<PasswordVaultDto>> AddAsync(PasswordVaultAddDto dto, CancellationToken cancellationToken);
     Task<IDataResult<PasswordVaultDto>> UpdateAsync(PasswordVaultUpdateDto dto, CancellationToken cancellationToken);
     Task<IResult> DeleteAsync(Guid passwordVaultId, CancellationToken cancellationToken);
     Task<PasswordVaultDto> GetByIdAsync(Guid passwordVaultId, CancellationToken cancellationToken);
+    Task<PasswordVaultDto> GetByIdAndUserAsync(Guid passwordVaultId, Guid userId, CancellationToken cancellationToken);
     Task<List<PasswordVaultDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false);
+    Task<List<PasswordVaultDto>> GetAllByUserAsync(Guid userId, CancellationToken cancellationToken, bool withDeleted = false);
 }
