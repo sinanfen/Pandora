@@ -35,11 +35,13 @@ public abstract class User : Entity<Guid>
     // Navigation properties for vaults and Pandora's boxes
     public ICollection<PasswordVault> PasswordVaults { get; set; }
     public ICollection<PersonalVault> PersonalVaults { get; set; }
+    public ICollection<Category> Categories { get; set; }
 
     public User() : base(Guid.NewGuid())
     {
         PasswordVaults = new List<PasswordVault>();
         PersonalVaults = new List<PersonalVault>();
+        Categories = new List<Category>();
     }
 }
 

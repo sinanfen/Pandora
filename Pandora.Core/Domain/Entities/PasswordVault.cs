@@ -7,16 +7,16 @@ public class PasswordVault : Entity<Guid>
     public User User { get; set; }
 
     // Name of the site, e.g., "Facebook"
-    public string SiteName { get; set; }
+    public string SecureSiteName { get; set; }
 
     // Encrypted username or email used for login
-    public string EncryptedUsernameOrEmail { get; set; }  // AES-encrypted
+    public string SecureUsernameOrEmail { get; set; }  // AES-encrypted
 
     // Hashed password for the site (irreversible)
     public string PasswordHash { get; set; }  // SHA512 hash
 
     // Optional notes about this credential (encrypted for privacy)
-    public string EncryptedNotes { get; set; }  // AES-encrypted
+    public string SecureNotes { get; set; }  // AES-encrypted
 
     // Date when the password was last changed
     public DateTime? LastPasswordChangeDate { get; set; }

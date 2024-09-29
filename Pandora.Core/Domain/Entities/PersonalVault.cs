@@ -7,26 +7,21 @@ public class PersonalVault : Entity<Guid>
     public User User { get; set; }
 
     // Title of the box entry, e.g., "Links to Watch Later", "Dear Diary"
-    public string Title { get; set; }
-
+    public string SecureTitle { get; set; }
     // AES-encrypted content (e.g., links, notes, documents, or media)
-    public string EncryptedContent { get; set; }
-
+    public string SecureContent { get; set; }
     // Summary or preview of the content, decrypted for display (optional)
-    public string Summary { get; set; }
+    public string SecureSummary { get; set; }
+    // Optional URL field for storing related links (AES-encrypted)
+    public string SecureUrl { get; set; }
+    // Encrypted field to store any media file references (optional)
+    public string SecureMediaFile { get; set; }  // Path to media file (AES-encrypted)
+    // Optional tags for better organization and searching
+    public IList<string> SecureTags { get; set; }
 
     // Metadata: Date of creation and last modified date
     public DateTime CreatedDate { get; set; }
     public DateTime? LastModifiedDate { get; set; }
-
-    // Optional URL field for storing related links (AES-encrypted)
-    public string EncryptedUrl { get; set; }
-
-    // Optional tags for better organization and searching
-    public ICollection<string> Tags { get; set; }
-
-    // Encrypted field to store any media file references (optional)
-    public string EncryptedMediaFile { get; set; }  // Path to media file (AES-encrypted)
 
     // Field to track whether this entry is marked as important or favorite
     public bool IsFavorite { get; set; }
@@ -40,7 +35,7 @@ public class PersonalVault : Entity<Guid>
 
     public PersonalVault() : base(Guid.NewGuid())
     {
-        Tags = new List<string>();
+        SecureTags = new List<string>();
         CreatedDate = DateTime.UtcNow;
     }
 }
