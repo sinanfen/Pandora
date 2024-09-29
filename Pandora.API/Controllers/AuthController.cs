@@ -30,6 +30,14 @@ public class AuthController : ControllerBase
         return Unauthorized(result.Message);
     }
 
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterAsync(UserRegisterDto userRegisterDto)
+    {
+        var cts = new CancellationTokenSource();
+        var result = await _userService.RegisterUserAsync(userRegisterDto, cts.Token);
+        return Ok(result);
+    }
+
     // Token doğrulama
     [HttpPost("validate-token")]
     public IActionResult ValidateToken(string token)
