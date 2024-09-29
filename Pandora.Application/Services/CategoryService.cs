@@ -127,6 +127,21 @@ public class CategoryService : ICategoryService
         }
     }
 
+    public async Task<List<CategoryDto>> GetAllByUserAsync(Guid userId, CancellationToken cancellationToken, bool withDeleted = false)
+    {
+        try
+        {
+            var pagedData = await _categoryRepository.GetListAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
+            var categoryDtos = _mapper.Map<List<CategoryDto>>(pagedData.Items);
+            return categoryDtos;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get list of category. Details: {ExceptionMessage}", nameof(GetAllAsync), ex.Message);
+            return null;
+        }
+    }
+
     public async Task<CategoryDto?> GetAsync(Expression<Func<Category, bool>> predicate, Func<IQueryable<Category>, IIncludableQueryable<Category, object>>? include = null, bool withDeleted = false, bool enableTracking = true, CancellationToken cancellationToken = default)
     {
         try
@@ -146,6 +161,20 @@ public class CategoryService : ICategoryService
         try
         {
             Category? category = await _categoryRepository.GetAsync(x => x.Id == categoryId, cancellationToken: cancellationToken);
+            return _mapper.Map<CategoryDto>(category);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get category. Details: {ExceptionMessage}", nameof(GetByIdAsync), ex.Message);
+            return null;
+        }
+    }
+
+    public async Task<CategoryDto> GetByIdAndUserAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            Category? category = await _categoryRepository.GetAsync(x => x.Id == categoryId && x.UserId == userId, cancellationToken: cancellationToken);
             return _mapper.Map<CategoryDto>(category);
         }
         catch (Exception ex)

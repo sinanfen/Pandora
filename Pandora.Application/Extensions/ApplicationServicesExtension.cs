@@ -23,6 +23,7 @@ public static class ApplicationServicesExtension
         services.AddScoped<IEncryption, SecurityService>();
         services.AddScoped<UserBusinessRules>();
         services.AddScoped<CategoryBusinessRules>();
+        services.AddScoped<PersonalVaultBusinessRules>();
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 

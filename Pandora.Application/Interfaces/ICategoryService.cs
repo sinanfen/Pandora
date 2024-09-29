@@ -28,5 +28,7 @@ public interface ICategoryService
     Task<IDataResult<CategoryDto>> UpdateAsync(CategoryUpdateDto dto, CancellationToken cancellationToken);
     Task<IResult> DeleteAsync(Guid categoryId, CancellationToken cancellationToken);
     Task<CategoryDto> GetByIdAsync(Guid categoryId, CancellationToken cancellationToken);
+    Task<CategoryDto> GetByIdAndUserAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken);
     Task<List<CategoryDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false);
+    Task<List<CategoryDto>> GetAllByUserAsync(Guid userId, CancellationToken cancellationToken, bool withDeleted = false);
 }
