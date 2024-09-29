@@ -1,0 +1,4 @@
+2024-09-21 18:49:47.862 +03:00 [ERR] Error in RegisterUserAsync. Failed to register the user. Details: Bu kullanıcı adı zaten alınmış.
+Pandora.CrossCuttingConcerns.ExceptionHandling.BusinessException: Bu kullanıcı adı zaten alınmış.
+   at Pandora.Application.BusinessRules.UserBusinessRules.UserNameCannotBeDuplicatedWhenInserted(String username) in C:\Users\Sinan\source\repos\Pandora\Pandora.Application\BusinessRules\UserBusinessRules.cs:line 21
+   at UserService.RegisterUserAsync(UserRegisterDto dto, CancellationToken cancellationToken) in C:\Users\Sinan\source\repos\Pandora\Pandora.Application\Services\UserService.cs:line 95
