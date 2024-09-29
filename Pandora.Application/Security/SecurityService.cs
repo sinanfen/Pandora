@@ -120,7 +120,6 @@ public class SecurityService : IHasher, IEncryption
         }
     }
 
-
     public void ThrowIfInvalidKey(byte[] key)
     {
         if (key.Length != 16 && key.Length != 24 && key.Length != 32)
@@ -128,5 +127,4 @@ public class SecurityService : IHasher, IEncryption
             throw new CryptographicException("Invalid AES key size. Key must be 16, 24, or 32 bytes.");
         }
     }
-
 }

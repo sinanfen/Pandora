@@ -70,7 +70,6 @@ public class PersonalVaultsController : ControllerBase
 
     // PUT: api/PersonalVaults/update
     [HttpPut]
-    [HttpPut]
     public async Task<IActionResult> UpdateAsync([FromBody] PersonalVaultUpdateDto dto, CancellationToken cancellationToken)
     {
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
@@ -85,7 +84,6 @@ public class PersonalVaultsController : ControllerBase
 
         return Ok(result.Data);
     }
-
 
     // DELETE: api/PersonalVaults/{personalVaultId}
     [HttpDelete("{personalVaultId}")]
@@ -103,5 +101,4 @@ public class PersonalVaultsController : ControllerBase
 
         return Ok(result.Message);
     }
-
 }
