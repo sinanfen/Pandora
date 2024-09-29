@@ -12,8 +12,8 @@ using Pandora.Infrastructure.Data.Contexts;
 namespace Pandora.Infrastructure.Migrations
 {
     [DbContext(typeof(PandoraDbContext))]
-    [Migration("20240916215011_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240928225100_PersonalVaultPropertyNamesChanged")]
+    partial class PersonalVaultPropertyNamesChanged
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,75 +57,10 @@ namespace Pandora.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Categories", (string)null);
-                });
-
-            modelBuilder.Entity("Pandora.Core.Domain.Entities.PandoraBox", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("CreatedDate")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("DeletedDate");
-
-                    b.Property<string>("EncryptedContent")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EncryptedMediaFile")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EncryptedUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsFavorite")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Summary")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string[]>("Tags")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("UpdatedDate");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PersonalVaults");
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.PasswordVault", b =>
@@ -147,15 +82,6 @@ namespace Pandora.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("DeletedDate");
 
-                    b.Property<string>("EncryptedNotes")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
-
-                    b.Property<string>("EncryptedUsernameOrEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("LastPasswordChangeDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -166,10 +92,19 @@ namespace Pandora.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("SiteName")
+                    b.Property<string>("SecureNotes")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<string>("SecureSiteName")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<string>("SecureUsernameOrEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone")
@@ -185,6 +120,74 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PasswordVaults", (string)null);
+                });
+
+            modelBuilder.Entity("Pandora.Core.Domain.Entities.PersonalVault", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedDate");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsFavorite")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SecureContent")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecureMediaFile")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecureSummary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string[]>("SecureTags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("SecureTitle")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecureUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedDate");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PersonalVaults");
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.User", b =>
@@ -309,24 +312,6 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasDiscriminator().HasValue(0);
                 });
 
-            modelBuilder.Entity("Pandora.Core.Domain.Entities.PandoraBox", b =>
-                {
-                    b.HasOne("Pandora.Core.Domain.Entities.Category", "Category")
-                        .WithMany("PersonalVaults")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Pandora.Core.Domain.Entities.User", "User")
-                        .WithMany("PersonalVaults")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Pandora.Core.Domain.Entities.PasswordVault", b =>
                 {
                     b.HasOne("Pandora.Core.Domain.Entities.Category", "Category")
@@ -345,18 +330,36 @@ namespace Pandora.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Pandora.Core.Domain.Entities.PersonalVault", b =>
+                {
+                    b.HasOne("Pandora.Core.Domain.Entities.Category", "Category")
+                        .WithMany("PersonalVaults")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Pandora.Core.Domain.Entities.User", "User")
+                        .WithMany("PersonalVaults")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Pandora.Core.Domain.Entities.Category", b =>
                 {
-                    b.Navigation("PersonalVaults");
-
                     b.Navigation("PasswordVaults");
+
+                    b.Navigation("PersonalVaults");
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.User", b =>
                 {
-                    b.Navigation("PersonalVaults");
-
                     b.Navigation("PasswordVaults");
+
+                    b.Navigation("PersonalVaults");
                 });
 #pragma warning restore 612, 618
         }

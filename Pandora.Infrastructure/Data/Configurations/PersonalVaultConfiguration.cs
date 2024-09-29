@@ -14,20 +14,20 @@ public class PersonalVaultConfiguration : BaseEntityConfiguration<PersonalVault,
         builder.HasKey(pb => pb.Id);
 
         // Properties
-        builder.Property(pb => pb.Title)
+        builder.Property(pb => pb.SecureTitle)
                .IsRequired()
                .HasMaxLength(256);
 
-        builder.Property(pb => pb.EncryptedContent)
+        builder.Property(pb => pb.SecureContent)
                .IsRequired(); // Content is AES-encrypted, no max length specified as it's variable length
 
-        builder.Property(pb => pb.Summary)
+        builder.Property(pb => pb.SecureSummary)
                .HasMaxLength(512); // Optional summary, limit length
 
-        builder.Property(pb => pb.EncryptedUrl)
+        builder.Property(pb => pb.SecureUrl)
                .HasMaxLength(512); // Optional, limit URL length
 
-        builder.Property(pb => pb.EncryptedMediaFile)
+        builder.Property(pb => pb.SecureMediaFile)
                .HasMaxLength(512); // Optional, limit media file path length
 
         builder.Property(pb => pb.IsFavorite)
@@ -50,7 +50,7 @@ public class PersonalVaultConfiguration : BaseEntityConfiguration<PersonalVault,
                .OnDelete(DeleteBehavior.SetNull); // Optional category, set null on delete
 
         // Tags are stored as a collection
-        builder.Property(pb => pb.Tags)
+        builder.Property(pb => pb.SecureTags)
                .HasConversion(
                     tags => string.Join(',', tags), // Store tags as comma-separated string
                     tags => tags.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()); // Convert back to List<string>

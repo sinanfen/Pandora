@@ -5,7 +5,7 @@
 namespace Pandora.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class TableNameAndConfigChanged : Migration
+    public partial class PropertyChangedFromEnumerableToList : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

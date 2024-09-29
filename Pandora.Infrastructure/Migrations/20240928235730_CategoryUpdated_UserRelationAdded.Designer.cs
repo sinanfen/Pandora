@@ -12,8 +12,8 @@ using Pandora.Infrastructure.Data.Contexts;
 namespace Pandora.Infrastructure.Migrations
 {
     [DbContext(typeof(PandoraDbContext))]
-    [Migration("20240924183820_TableNameAndConfigChanged")]
-    partial class TableNameAndConfigChanged
+    [Migration("20240928235730_CategoryUpdated_UserRelationAdded")]
+    partial class CategoryUpdated_UserRelationAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,10 +55,15 @@ namespace Pandora.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("UpdatedDate");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
                         .IsUnique();
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -82,15 +87,6 @@ namespace Pandora.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("DeletedDate");
 
-                    b.Property<string>("EncryptedNotes")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
-
-                    b.Property<string>("EncryptedUsernameOrEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("LastPasswordChangeDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -101,10 +97,19 @@ namespace Pandora.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("SiteName")
+                    b.Property<string>("SecureNotes")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<string>("SecureSiteName")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<string>("SecureUsernameOrEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone")
@@ -141,18 +146,6 @@ namespace Pandora.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("DeletedDate");
 
-                    b.Property<string>("EncryptedContent")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EncryptedMediaFile")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EncryptedUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -162,15 +155,27 @@ namespace Pandora.Infrastructure.Migrations
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Summary")
+                    b.Property<string>("SecureContent")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string[]>("Tags")
+                    b.Property<string>("SecureMediaFile")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecureSummary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string[]>("SecureTags")
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("SecureTitle")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecureUrl")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -312,6 +317,17 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasDiscriminator().HasValue(0);
                 });
 
+            modelBuilder.Entity("Pandora.Core.Domain.Entities.Category", b =>
+                {
+                    b.HasOne("Pandora.Core.Domain.Entities.User", "User")
+                        .WithMany("Categories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Pandora.Core.Domain.Entities.PasswordVault", b =>
                 {
                     b.HasOne("Pandora.Core.Domain.Entities.Category", "Category")
@@ -357,6 +373,8 @@ namespace Pandora.Infrastructure.Migrations
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("PasswordVaults");
 
                     b.Navigation("PersonalVaults");

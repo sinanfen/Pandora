@@ -14,17 +14,17 @@ public class PasswordVaultConfiguration : BaseEntityConfiguration<PasswordVault,
         builder.HasKey(pv => pv.Id);
 
         // Configure properties
-        builder.Property(pv => pv.SiteName)
+        builder.Property(pv => pv.SecureSiteName)
                .IsRequired()
                .HasMaxLength(256); // Limit site name length
 
-        builder.Property(pv => pv.EncryptedUsernameOrEmail)
+        builder.Property(pv => pv.SecureUsernameOrEmail)
                .IsRequired(); // AES-encrypted field
 
         builder.Property(pv => pv.PasswordHash)
                .IsRequired(); // Hashed password (irreversible)
 
-        builder.Property(pv => pv.EncryptedNotes)
+        builder.Property(pv => pv.SecureNotes)
                .HasMaxLength(512); // Optional notes (encrypted)
 
         builder.Property(pv => pv.LastPasswordChangeDate)
