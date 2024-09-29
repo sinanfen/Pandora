@@ -17,15 +17,23 @@ namespace Pandora.Application.Validators.PasswordVaultValidators
                 .NotEmpty().WithMessage("Kullanıcı adı veya email boş olamaz.")
                 .MinimumLength(5).WithMessage("Kullanıcı adı veya email en az 5 karakter olmalıdır.");
 
-            //// PasswordExpirationDate validation
-            //RuleFor(x => x.PasswordExpirationDate)
-            //    .GreaterThan(DateTime.UtcNow).WithMessage("Şifre son kullanma tarihi bugünden ileri bir tarih olmalıdır.")
-            //    .When(x => x.PasswordExpirationDate.HasValue);
+            // CurrentPassword field validation
+            RuleFor(x => x.CurrentPassword)
+                .NotEmpty().WithMessage("Mevcut şifre boş olamaz.")
+                .MinimumLength(8).WithMessage("Mevcut şifre en az 8 karakter olmalıdır.");
 
-            //// LastPasswordChangeDate validation
-            //RuleFor(x => x.LastPasswordChangeDate)
-            //    .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Son şifre değiştirme tarihi geçersiz.")
-            //    .When(x => x.LastPasswordChangeDate.HasValue);
+            // NewPassword field validation
+            RuleFor(x => x.NewPassword)
+                .NotEmpty().WithMessage("Yeni şifre boş olamaz.")
+                .MinimumLength(8).WithMessage("Yeni şifre en az 8 karakter olmalıdır.")
+                .Matches("[A-Z]").WithMessage("Yeni şifre en az bir büyük harf içermelidir.")
+                .Matches("[a-z]").WithMessage("Yeni şifre en az bir küçük harf içermelidir.")
+                .Matches("[0-9]").WithMessage("Yeni şifre en az bir rakam içermelidir.")
+                .Matches("[^a-zA-Z0-9]").WithMessage("Yeni şifre en az bir özel karakter içermelidir.");
+
+            // NewPasswordRepeat must match NewPassword
+            RuleFor(x => x.NewPasswordRepeat)
+                .Equal(x => x.NewPassword).WithMessage("Yeni şifre tekrarı, yeni şifreyle aynı olmalıdır.");
 
             // CategoryId validation
             RuleFor(x => x.CategoryId)
