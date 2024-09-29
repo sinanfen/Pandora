@@ -21,7 +21,7 @@ public class UsersController : ControllerBase
 
     // GET: api/User/CreateDefaultUser
     [HttpPost("default")]
-    public async Task<IActionResult> CreateDefaultUser()
+    public async Task<IActionResult> CreateDefaultUser(CancellationToken cancellationToken)
     {
         var userRegisterDto = new UserRegisterDto
         {
@@ -35,25 +35,21 @@ public class UsersController : ControllerBase
             LastName = "User"
         };
 
-        var cts = new CancellationTokenSource();
-        var result = await _userService.RegisterUserAsync(userRegisterDto, cts.Token);
-
+        var result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
-        var cts = new CancellationTokenSource();
-        var data = await _userService.GetAllAsync(cts.Token);
+        var data = await _userService.GetAllAsync(cancellationToken);
         return Ok(data);
     }
 
     [HttpGet("{userId}")]
-    public async Task<IActionResult> GetAsync(Guid userId)
+    public async Task<IActionResult> GetAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var cts = new CancellationTokenSource();
-        var result = await _userService.GetByIdAsync(userId, cts.Token);
+        var result = await _userService.GetByIdAsync(userId, cancellationToken);
         if (result == null)
         {
             return NotFound();
@@ -63,14 +59,13 @@ public class UsersController : ControllerBase
 
     // PUT: api/users/update/{userId}
     [HttpPut]
-    public async Task<IActionResult> UpdateAsync([FromBody] UserUpdateDto userUpdateDto)
+    public async Task<IActionResult> UpdateAsync([FromBody] UserUpdateDto userUpdateDto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        var cts = new CancellationTokenSource();
-        var result = await _userService.UpdateUserAsync(userUpdateDto, cts.Token);
+        var result = await _userService.UpdateUserAsync(userUpdateDto, cancellationToken);
         if (result == null)
         {
             return NotFound();
@@ -81,10 +76,9 @@ public class UsersController : ControllerBase
 
     // DELETE: api/users/delete/{userId}
     [HttpDelete("{userId}")]
-    public async Task<IActionResult> DeleteAsync(Guid userId)
+    public async Task<IActionResult> DeleteAsync(Guid userId,CancellationToken cancellationToken)
     {
-        var cts = new CancellationTokenSource();
-        var result = await _userService.DeleteAsync(userId, cts.Token);
+        var result = await _userService.DeleteAsync(userId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
         {
             return NotFound();

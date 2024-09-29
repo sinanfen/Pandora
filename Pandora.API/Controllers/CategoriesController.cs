@@ -54,15 +54,14 @@ public class CategoriesController : ControllerBase
 
     // POST: api/categories/add
     [HttpPost]
-    public async Task<IActionResult> AddAsync([FromBody] CategoryAddDto categoryAddDto)
+    public async Task<IActionResult> AddAsync([FromBody] CategoryAddDto categoryAddDto,CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var cts = new CancellationTokenSource();
-        var result = await _categoryService.AddAsync(categoryAddDto, cts.Token);
+        var result = await _categoryService.AddAsync(categoryAddDto, cancellationToken);
         return Ok(result);
     }
 

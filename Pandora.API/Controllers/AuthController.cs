@@ -20,9 +20,9 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/login
     [HttpPost("login")]
-    public async Task<IActionResult> Login(UserLoginDto dto)
+    public async Task<IActionResult> Login(UserLoginDto dto, CancellationToken cancellationToken)
     {
-        var result = await _authService.LoginAsync(dto);
+        var result = await _authService.LoginAsync(dto, cancellationToken);
         if (result.ResultStatus == ResultStatus.Success)
         {
             return Ok(new { Token = result.Data, Message = result.Message });
@@ -31,10 +31,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterAsync(UserRegisterDto userRegisterDto)
+    public async Task<IActionResult> RegisterAsync(UserRegisterDto userRegisterDto, CancellationToken cancellationToken)
     {
-        var cts = new CancellationTokenSource();
-        var result = await _userService.RegisterUserAsync(userRegisterDto, cts.Token);
+        var result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
         return Ok(result);
     }
 

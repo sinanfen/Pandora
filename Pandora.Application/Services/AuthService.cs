@@ -56,15 +56,14 @@ public class AuthService : IAuthService
     }
 
     // Kullanıcı girişi (Login)
-    public async Task<IDataResult<string>> LoginAsync(UserLoginDto dto)
+    public async Task<IDataResult<string>> LoginAsync(UserLoginDto dto, CancellationToken cancellationToken)
     {
-        var cts = new CancellationTokenSource();
         User? userEntity = null;
 
         if (IsValidEmail(dto.UsernameOrEmail))
-            userEntity = await _userService.GetEntityByEmailAsync(dto.UsernameOrEmail, cts.Token);
+            userEntity = await _userService.GetEntityByEmailAsync(dto.UsernameOrEmail, cancellationToken);
         else
-            userEntity = await _userService.GetEntityByUsernameAsync(dto.UsernameOrEmail, cts.Token);
+            userEntity = await _userService.GetEntityByUsernameAsync(dto.UsernameOrEmail, cancellationToken);
 
         if (userEntity == null)
             return new DataResult<string>(ResultStatus.Error, "Kullanıcı bulunamadı", data: null);
