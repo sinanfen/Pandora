@@ -1,7 +1,7 @@
 ﻿
 namespace Pandora.Application.DTOs.PersonalVaultDTOs;
 
-public class PersonalVaultUpdateDto : BaseDto<Guid>
+public class PersonalVaultUpdateDto : BaseDto<Guid>, IPersonalVaultDto
 {
     // User details
     public Guid UserId { get; set; }
@@ -12,7 +12,7 @@ public class PersonalVaultUpdateDto : BaseDto<Guid>
     public string Url { get; set; }  // Unencrypted URL (to be AES-encrypted)
     public string MediaFile { get; set; }  // Unencrypted media file path (to be AES-encrypted)
     public string Summary { get; set; }  // Optional summary of the content
-    public ICollection<string> Tags { get; set; }  // Tags for organization
+    public IList<string> Tags { get; set; }  // Tags for organization
 
     // Category
     public Guid? CategoryId { get; set; }  // Update category if needed

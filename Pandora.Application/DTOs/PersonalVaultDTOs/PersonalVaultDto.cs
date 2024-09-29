@@ -8,11 +8,11 @@ public class PersonalVaultDto : BaseDto<Guid>
     public string Username { get; set; }  // Optionally display the username
 
     // Box content
-    public string Title { get; set; }  // Box title (e.g., "Links to Watch Later")
-    public string EncryptedContent { get; set; }  // AES-encrypted content (e.g., notes, links)
-    public string Summary { get; set; }  // Optional preview of the content
-    public string EncryptedUrl { get; set; }  // AES-encrypted URL, if available
-    public string EncryptedMediaFile { get; set; }  // AES-encrypted media file path, if any
+    public string SecureTitle { get; set; }  // Box title (e.g., "Links to Watch Later")
+    public string SecureContent { get; set; }  // AES-encrypted content (e.g., notes, links)
+    public string SecureSummary { get; set; }  // Optional preview of the content
+    public string SecureUrl { get; set; }  // AES-encrypted URL, if available
+    public string SecureMediaFile { get; set; }  // AES-encrypted media file path, if any
 
     // Metadata
     public DateTime CreatedDate { get; set; }
@@ -20,7 +20,7 @@ public class PersonalVaultDto : BaseDto<Guid>
     public DateTime? ExpirationDate { get; set; }
 
     // Tagging and favorite feature
-    public ICollection<string> Tags { get; set; }  // Tags for organization
+    public IList<string> SecureTags { get; set; }  // Tags for organization
     public bool IsFavorite { get; set; }  // Whether the entry is marked as favorite
 
     // Category details

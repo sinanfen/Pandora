@@ -1,10 +1,13 @@
 ﻿using Pandora.Application.DTOs.PersonalVaultDTOs;
 using Pandora.Application.DTOs.PasswordVaultDTOs;
+using Pandora.Application.DTOs.UserDTOs;
 
 namespace Pandora.Application.DTOs.CategoryDTOs;
 
 public class CategoryDto : BaseDto<Guid>
 {
+    public Guid UserId { get; set; }
+    public virtual UserDto UserDto { get; set; }
     public string Name { get; set; }  // Category name, e.g., Social Media, Work
     public string Description { get; set; }  // Optional category description
 
