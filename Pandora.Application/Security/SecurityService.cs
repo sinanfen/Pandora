@@ -8,13 +8,13 @@ namespace Pandora.Application.Security;
 public class SecurityService : IHasher, IEncryption
 {
     private readonly byte[] _aesKey;
-    private readonly byte[] _aesIv;
 
     public SecurityService()
     {
-        // Use secure key management (e.g., environment variables) in production
-        _aesKey = Encoding.UTF8.GetBytes("your-32-byte-aes-key-1234567890123456");
-        _aesIv = Encoding.UTF8.GetBytes("your-16-byte-iv-here");
+        // Environment variables'dan AES key değerlerini al
+        _aesKey = Convert.FromBase64String(Environment.GetEnvironmentVariable("AES_KEY") ?? throw new InvalidOperationException("AES_KEY bulunamadı."));
+
+        ThrowIfInvalidKey(_aesKey);
     }
 
     // IHasher Implementation
@@ -70,12 +70,18 @@ public class SecurityService : IHasher, IEncryption
         using (Aes aesAlg = Aes.Create())
         {
             aesAlg.Key = _aesKey;
-            aesAlg.IV = _aesIv;
+
+            // Rastgele IV oluştur
+            aesAlg.GenerateIV();
+            var iv = aesAlg.IV;
 
             ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
 
             using (var msEncrypt = new MemoryStream())
             {
+                // IV'yi şifreli verinin başına ekle
+                msEncrypt.Write(iv, 0, iv.Length);
+
                 using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                 using (var swEncrypt = new StreamWriter(csEncrypt))
                 {
@@ -89,21 +95,38 @@ public class SecurityService : IHasher, IEncryption
 
     public string Decrypt(string cipherText)
     {
+        var fullCipher = Convert.FromBase64String(cipherText);
+
         using (Aes aesAlg = Aes.Create())
         {
             aesAlg.Key = _aesKey;
-            aesAlg.IV = _aesIv;
+
+            // Şifreli veriden IV'yi çıkar
+            var iv = new byte[aesAlg.BlockSize / 8];
+            Array.Copy(fullCipher, 0, iv, 0, iv.Length);
+            aesAlg.IV = iv;
+
+            var cipher = new byte[fullCipher.Length - iv.Length];
+            Array.Copy(fullCipher, iv.Length, cipher, 0, cipher.Length);
 
             ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
-            using (var msDecrypt = new MemoryStream(Convert.FromBase64String(cipherText)))
+            using (var msDecrypt = new MemoryStream(cipher))
+            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+            using (var srDecrypt = new StreamReader(csDecrypt))
             {
-                using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                using (var srDecrypt = new StreamReader(csDecrypt))
-                {
-                    return srDecrypt.ReadToEnd();
-                }
+                return srDecrypt.ReadToEnd();
             }
         }
     }
+
+
+    public void ThrowIfInvalidKey(byte[] key)
+    {
+        if (key.Length != 16 && key.Length != 24 && key.Length != 32)
+        {
+            throw new CryptographicException("Invalid AES key size. Key must be 16, 24, or 32 bytes.");
+        }
+    }
+
 }
