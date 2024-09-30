@@ -28,9 +28,12 @@ public class UserService : IUserService
     private readonly UserBusinessRules _userBusinessRules;
     private readonly IValidator<UserRegisterDto> _userRegisterDtoValidator;
     private readonly IValidator<UserUpdateDto> _userUpdateDtoValidator;
+    private readonly IValidator<UserPasswordChangeDto> _userPasswordChangeDtoValidator;
     private readonly ILogger<UserService> _logger;
 
-    public UserService(IUserRepository userRepository, IHasher hasher, IEncryption encryption, IMapper mapper, UserBusinessRules userBusinessRules, ILogger<UserService> logger, IValidator<UserRegisterDto> userRegisterDtoValidator, IValidator<UserUpdateDto> userUpdateDtoValidator)
+    public UserService(IUserRepository userRepository, IHasher hasher, IEncryption encryption, IMapper mapper, UserBusinessRules userBusinessRules,
+        ILogger<UserService> logger, IValidator<UserRegisterDto> userRegisterDtoValidator, IValidator<UserUpdateDto> userUpdateDtoValidator,
+        IValidator<UserPasswordChangeDto> userPasswordChangeDtoValidator)
     {
         _userRepository = userRepository;
         _hasher = hasher;
@@ -40,6 +43,7 @@ public class UserService : IUserService
         _logger = logger;
         _userRegisterDtoValidator = userRegisterDtoValidator;
         _userUpdateDtoValidator = userUpdateDtoValidator;
+        _userPasswordChangeDtoValidator = userPasswordChangeDtoValidator;
     }
 
     public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken)
@@ -281,4 +285,41 @@ public class UserService : IUserService
             return null;
         }
     }
+
+    public async Task<IResult> ChangePasswordAsync(UserPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var validationResult = await _userPasswordChangeDtoValidator.ValidateAsync(userPasswordChangeDto);
+            if (!validationResult.IsValid)
+                return new Result(ResultStatus.Error, "Doğrulama hatası: " + string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
+
+            var user = await _userRepository.GetAsync(u => u.Id == userPasswordChangeDto.Id, cancellationToken: cancellationToken);
+            if (user == null)
+                return new Result(ResultStatus.Error, "Kullanıcı bulunamadı.");
+
+            var isCurrentPasswordValid = _userBusinessRules.EnsureCurrentPasswordIsCorrect(userPasswordChangeDto.CurrentPassword, user.PasswordHash, _hasher);
+            if (!isCurrentPasswordValid)
+                return new Result(ResultStatus.Error, "Mevcut şifre geçersiz.");
+
+            // Check password complexity
+            _userBusinessRules.EnsurePasswordMeetsComplexityRules(userPasswordChangeDto.NewPassword);
+
+            user.PasswordHash = _hasher.HashPassword(userPasswordChangeDto.NewPassword, HashAlgorithmType.Sha512);
+
+            user.LastPasswordChangeDate = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user, cancellationToken);
+
+            return new Result(ResultStatus.Success, "Şifre başarıyla değiştirildi.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while changing password for user ID {UserId}: {ExceptionMessage}", userPasswordChangeDto.Id, ex.Message);
+            return new Result(ResultStatus.Error, "Şifre değiştirilirken bir hata oluştu.");
+        }
+    }
+
+
+
 }

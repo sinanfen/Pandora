@@ -33,6 +33,7 @@ public interface IUserService
     Task<IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken);
     Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false);
+    Task<IResult> ChangePasswordAsync(UserPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken);
     Task<string> GeneratePasswordHashAsync(string password);
     Task<bool> VerifyPasswordHashAsync(string hashedPassword, string password);
 

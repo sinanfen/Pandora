@@ -1,5 +1,7 @@
 ﻿using Pandora.Application.Interfaces.Repositories;
+using Pandora.Application.Security.Interfaces;
 using Pandora.CrossCuttingConcerns.ExceptionHandling;
+using System.Security.Authentication;
 
 namespace Pandora.Application.BusinessRules;
 
@@ -50,6 +52,27 @@ public class UserBusinessRules
         {
             throw new BusinessException("Bu email zaten kayıtlı.");
         }
+    }
+
+    // Password complexity rule
+    public void EnsurePasswordMeetsComplexityRules(string password)
+    {
+        var specialCharacters = "!@#$%^&*()_-+=<>?{}[]|\\/~`.,;:'\"";
+
+        if (password.Length < 8 ||
+            !password.Any(char.IsDigit) ||
+            !password.Any(char.IsUpper) ||
+            !password.Any(c => specialCharacters.Contains(c)))
+        {
+            throw new BusinessException("Şifre en az 8 karakter uzunluğunda, bir büyük harf, bir rakam ve bir özel karakter içermelidir.");
+        }
+    }
+
+
+    // Ensure the current password is correct
+    public bool EnsureCurrentPasswordIsCorrect(string currentPassword, string hashedPassword, IHasher hasher)
+    {
+        return hasher.VerifyHashedPassword(hashedPassword, currentPassword, HashAlgorithmType.Sha512);
     }
 }
 

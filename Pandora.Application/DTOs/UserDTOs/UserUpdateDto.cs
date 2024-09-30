@@ -15,4 +15,7 @@ public class UserUpdateDto : BaseDto<Guid>
     // Individual-specific fields
     public string FirstName { get; set; }    // Updatable for individual users
     public string LastName { get; set; }     // Updatable for individual users
+
+    // Timestamps for auditing
+    public DateTime? LastLoginDate { get; set; } // Last login timestamp
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pandora.Application.DTOs.UserDTOs;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Utilities.Results;
@@ -35,6 +36,19 @@ public class AuthController : ControllerBase
     {
         var result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] UserPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken)
+    {
+        var result = await _userService.ChangePasswordAsync(userPasswordChangeDto, cancellationToken);
+        if (result.ResultStatus == ResultStatus.Error)
+        {
+            return BadRequest(result.Message);
+        }
+
+        return Ok(result.Message);
     }
 
     // Token doğrulama

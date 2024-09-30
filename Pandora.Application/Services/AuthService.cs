@@ -13,6 +13,7 @@ using System.Text;
 using AutoMapper;
 using System.Text.RegularExpressions;
 using Pandora.Core.Domain.Entities;
+using Pandora.Application.Interfaces.Repositories;
 
 namespace Pandora.Application.Services;
 
@@ -21,14 +22,16 @@ public class AuthService : IAuthService
     private readonly IConfiguration _configuration;
     private readonly IHasher _hasher;
     private readonly IUserService _userService;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
-    public AuthService(IConfiguration configuration, IHasher hasher, IUserService userService, IMapper mapper)
+    public AuthService(IConfiguration configuration, IHasher hasher, IUserService userService, IMapper mapper, IUserRepository userRepository)
     {
         _configuration = configuration;
         _hasher = hasher;
         _userService = userService;
         _mapper = mapper;
+        _userRepository = userRepository;
     }
 
     // JWT Token üretme
@@ -71,6 +74,9 @@ public class AuthService : IAuthService
         var isPasswordValid = VerifyPassword(userEntity.PasswordHash, dto.Password);
         if (!isPasswordValid)
             return new DataResult<string>(ResultStatus.Error, "Geçersiz şifre", data: null);
+
+        userEntity.LastLoginDate = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(userEntity);
 
         var userDto = _mapper.Map<UserDto>(userEntity);
         var token = GenerateToken(userDto);
