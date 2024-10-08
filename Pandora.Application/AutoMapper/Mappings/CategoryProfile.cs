@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Pandora.Application.DTOs.CategoryDTOs;
 using Pandora.Core.Domain.Entities;
+using Pandora.Shared.DTOs.CategoryDTOs;
 
 namespace Pandora.Application.AutoMapper.Mappings;
 

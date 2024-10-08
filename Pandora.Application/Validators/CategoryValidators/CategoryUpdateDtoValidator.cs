@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Pandora.Application.DTOs.CategoryDTOs;
+using Pandora.Shared.DTOs.CategoryDTOs;
 
 namespace Pandora.Application.Validators.CategoryValidators;
 

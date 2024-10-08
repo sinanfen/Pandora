@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pandora.Application.DTOs.PersonalVaultDTOs;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Security.Interfaces;
 using Pandora.Application.Utilities.Results;
+using Pandora.Shared.DTOs.PersonalVaultDTOs;
 using System.Security.Claims;
 
 namespace Pandora.API.Controllers;

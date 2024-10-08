@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Pandora.Application.DTOs.PersonalVaultDTOs;
 using Pandora.Core.Domain.Entities;
+using Pandora.Shared.DTOs.PersonalVaultDTOs;
 
 namespace Pandora.Application.AutoMapper.Mappings;
 

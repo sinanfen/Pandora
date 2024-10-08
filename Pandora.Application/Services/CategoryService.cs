@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore.Query;
-using Pandora.Application.DTOs.CategoryDTOs;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Repositories;
 using Pandora.Application.Utilities.Results.Implementations;
@@ -13,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Pandora.Core.Domain.Paging;
 using FluentValidation;
 using Pandora.Application.BusinessRules;
-using Pandora.Application.DTOs.UserDTOs;
+using Pandora.Shared.DTOs.CategoryDTOs;
 
 namespace Pandora.Application.Services;
 

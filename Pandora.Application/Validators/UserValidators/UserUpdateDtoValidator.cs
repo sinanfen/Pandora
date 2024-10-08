@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Pandora.Application.DTOs.UserDTOs;
+using Pandora.Shared.DTOs.UserDTOs;
 
 namespace Pandora.Application.Validators.UserValidators;
 

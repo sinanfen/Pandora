@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Pandora.Application.DTOs.UserDTOs;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Security.Interfaces;
 using Pandora.Application.Utilities.Results.Implementations;
@@ -14,6 +13,7 @@ using AutoMapper;
 using System.Text.RegularExpressions;
 using Pandora.Core.Domain.Entities;
 using Pandora.Application.Interfaces.Repositories;
+using Pandora.Shared.DTOs.UserDTOs;
 
 namespace Pandora.Application.Services;
 

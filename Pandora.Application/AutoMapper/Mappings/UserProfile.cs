@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Pandora.Application.DTOs.UserDTOs;
 using Pandora.Core.Domain.Constants.Enums;
 using Pandora.Core.Domain.Entities;
+using Pandora.Shared.DTOs.UserDTOs;
 
 namespace Pandora.Application.AutoMapper.Mappings;
 

@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore.Query;
-using Pandora.Application.DTOs.PersonalVaultDTOs;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Repositories;
 using Pandora.Application.Security.Interfaces;
@@ -13,6 +12,7 @@ using System.Linq.Expressions;
 using Pandora.CrossCuttingConcerns.ExceptionHandling;
 using Pandora.Application.Validators.PersonalVaultValidators;
 using Microsoft.Extensions.Logging;
+using Pandora.Shared.DTOs.PersonalVaultDTOs;
 
 namespace Pandora.Application.Services;
 

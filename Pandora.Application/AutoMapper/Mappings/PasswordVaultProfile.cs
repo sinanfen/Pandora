@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Pandora.Application.DTOs.PasswordVaultDTOs;
 using Pandora.Core.Domain.Entities;
+using Pandora.Shared.DTOs.PasswordVaultDTOs;
 
 namespace Pandora.Application.AutoMapper.Mappings;
 

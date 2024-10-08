@@ -1,5 +1,5 @@
-﻿using Pandora.Application.DTOs.UserDTOs;
-using Pandora.Application.Utilities.Results.Interfaces;
+﻿using Pandora.Application.Utilities.Results.Interfaces;
+using Pandora.Shared.DTOs.UserDTOs;
 using System.Security.Claims;
 
 namespace Pandora.Application.Interfaces;

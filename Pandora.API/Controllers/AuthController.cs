@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pandora.Application.DTOs.UserDTOs;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Utilities.Results;
+using Pandora.Shared.DTOs.UserDTOs;
 
 namespace Pandora.API.Controllers;
 

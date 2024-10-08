@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
-using Pandora.Application.DTOs.UserDTOs;
 using Pandora.Application.Interfaces.Repositories;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Security.Interfaces;
 using Pandora.Application.Utilities.Results.Implementations;
 using Pandora.Application.Utilities.Results.Interfaces;
 using Pandora.Application.Utilities.Results;
-using Pandora.Core.Domain.Constants.Enums;
 using Pandora.Core.Domain.Entities;
 using System.Security.Authentication;
 using FluentValidation;
@@ -16,6 +14,8 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using Pandora.Core.Persistence.Paging;
 using Pandora.Core.Domain.Paging;
+using Pandora.Shared.DTOs.UserDTOs;
+using Pandora.Shared.Enums;
 
 namespace Pandora.Application.Services;
 

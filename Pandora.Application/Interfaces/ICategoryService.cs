@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Query;
-using Pandora.Application.DTOs.CategoryDTOs;
 using Pandora.Application.Utilities.Results.Interfaces;
 using Pandora.Core.Domain.Entities;
 using Pandora.Core.Persistence.Paging;
+using Pandora.Shared.DTOs.CategoryDTOs;
 using System.Linq.Expressions;
 
 namespace Pandora.Application.Interfaces;
