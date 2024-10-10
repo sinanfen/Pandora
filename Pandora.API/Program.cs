@@ -88,11 +88,11 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("https://localhost:7192") //4200 Angular
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials()); // Required if you're using authentication cookies or tokens
 });
-
 
 // Later in the pipeline
 
