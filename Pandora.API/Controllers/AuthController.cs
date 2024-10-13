@@ -45,10 +45,10 @@ public class AuthController : ControllerBase
         var result = await _userService.ChangePasswordAsync(userPasswordChangeDto, cancellationToken);
         if (result.ResultStatus == ResultStatus.Error)
         {
-            return BadRequest(result.Message);
+            return BadRequest(new { Message = result.Message }); // Return structured JSON
         }
 
-        return Ok(result.Message);
+        return Ok(new { Message = result.Message }); // Success message in structured JSON
     }
 
     // Token doğrulama

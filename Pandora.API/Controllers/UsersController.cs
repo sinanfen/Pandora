@@ -23,7 +23,7 @@ public class UsersController : ControllerBase
     [HttpPost("default")]
     public async Task<IActionResult> CreateDefaultUser(CancellationToken cancellationToken)
     {
-        var userRegisterDto = new UserRegisterDto
+        var individualUserRegisterDto = new IndividualUserRegisterDto()
         {
             Username = "sinanfen",
             Email = "sinanfen@example.com",
@@ -31,11 +31,11 @@ public class UsersController : ControllerBase
             ConfirmPassword = "SinanFen123#",
             PhoneNumber = "123-456-7890",
             UserType = UserType.Individual,
-            FirstName = "Test",
-            LastName = "User"
+            FirstName = "Sinan",
+            LastName = "Fen"
         };
 
-        var result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
+        var result = await _userService.RegisterUserAsync(individualUserRegisterDto, cancellationToken);
         return Ok(result);
     }
 
@@ -57,26 +57,55 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    // PUT: api/users/update/{userId}
-    [HttpPut]
-    public async Task<IActionResult> UpdateAsync([FromBody] UserUpdateDto userUpdateDto, CancellationToken cancellationToken)
+    // PUT: api/users/individual/{userId}
+    [HttpPut("individual/{userId}")]
+    public async Task<IActionResult> UpdateIndividualAsync(Guid userId, [FromBody] IndividualUserUpdateDto individualDto, CancellationToken cancellationToken)
     {
+        if (userId != individualDto.Id)
+        {
+            return BadRequest("User ID in the URL does not match the ID in the request body.");
+        }
+
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        var result = await _userService.UpdateUserAsync(userUpdateDto, cancellationToken);
+
+        var result = await _userService.UpdateIndividualUserAsync(individualDto, cancellationToken);
         if (result == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
-        return Ok(result); // 200 OK
+        return Ok(result);
+    }
+
+    // PUT: api/users/corporate/{userId}
+    [HttpPut("corporate/{userId}")]
+    public async Task<IActionResult> UpdateCorporateAsync(Guid userId, [FromBody] CorporateUserUpdateDto corporateDto, CancellationToken cancellationToken)
+    {
+        if (userId != corporateDto.Id)
+        {
+            return BadRequest("User ID in the URL does not match the ID in the request body.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var result = await _userService.UpdateCorporateUserAsync(corporateDto, cancellationToken);
+        if (result == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        return Ok(result);
     }
 
     // DELETE: api/users/delete/{userId}
     [HttpDelete("{userId}")]
-    public async Task<IActionResult> DeleteAsync(Guid userId,CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await _userService.DeleteAsync(userId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
