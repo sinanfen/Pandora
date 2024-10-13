@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
 using Pandora.Shared.DTOs.UserDTOs;
 
-public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>
+public class IndividualUserUpdateDtoValidator : AbstractValidator<IndividualUserUpdateDto>
 {
-    public UserUpdateDtoValidator()
+    public IndividualUserUpdateDtoValidator()
     {
         // Username Validation
         RuleFor(x => x.Username)
@@ -18,5 +18,14 @@ public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>
         // Phone Number Validation
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("Telefon numarası boş olamaz.");
+
+        // Individual-specific Validation
+        RuleFor(x => x.FirstName)
+            .NotEmpty().WithMessage("Ad boş olamaz.")
+            .Length(2, 50).WithMessage("Ad 2 ile 50 karakter arasında olmalıdır.");
+
+        RuleFor(x => x.LastName)
+            .NotEmpty().WithMessage("Soyad boş olamaz.")
+            .Length(2, 50).WithMessage("Soyad 2 ile 50 karakter arasında olmalıdır.");
     }
 }

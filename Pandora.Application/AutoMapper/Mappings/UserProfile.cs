@@ -9,19 +9,26 @@ public class UserProfile : Profile
 {
     public UserProfile()
     {
-        CreateMap<UserRegisterDto, User>()
-            .Include<UserRegisterDto, IndividualUser>()
-            .Include<UserRegisterDto, CorporateUser>();
+        // Mapping for individual user update
+        CreateMap<IndividualUserUpdateDto, IndividualUser>()
+            .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))
+            .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
+            .ReverseMap(); // For two-way mapping if needed
 
-        CreateMap<UserRegisterDto, IndividualUser>()
-            .ForMember(dest => dest.UserType, opt => opt.MapFrom(src => UserType.Individual));
+        // Mapping for corporate user update
+        CreateMap<CorporateUserUpdateDto, CorporateUser>()
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.CompanyName))
+            .ForMember(dest => dest.TaxNumber, opt => opt.MapFrom(src => src.TaxNumber))
+            .ReverseMap();
 
-        CreateMap<UserRegisterDto, CorporateUser>()
-            .ForMember(dest => dest.UserType, opt => opt.MapFrom(src => UserType.Corporate));
+        CreateMap<IndividualUser, UserDto>()
+            .IncludeBase<User, UserDto>();
 
-        // Diğer mapping işlemleri
+        CreateMap<CorporateUser, UserDto>()
+            .IncludeBase<User, UserDto>();
+
+
+        // General User mappings
         CreateMap<User, UserDto>().ReverseMap();
-        CreateMap<UserUpdateDto, User>().ReverseMap();
-
     }
 }

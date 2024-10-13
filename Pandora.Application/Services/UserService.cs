@@ -28,12 +28,15 @@ public class UserService : IUserService
     private readonly UserBusinessRules _userBusinessRules;
     private readonly IValidator<UserRegisterDto> _userRegisterDtoValidator;
     private readonly IValidator<UserUpdateDto> _userUpdateDtoValidator;
+    private readonly IValidator<IndividualUserUpdateDto> _individualUserUpdateDtoValidator;
+    private readonly IValidator<CorporateUserUpdateDto> _corporateUserUpdateDtoValidator;
     private readonly IValidator<UserPasswordChangeDto> _userPasswordChangeDtoValidator;
     private readonly ILogger<UserService> _logger;
 
     public UserService(IUserRepository userRepository, IHasher hasher, IEncryption encryption, IMapper mapper, UserBusinessRules userBusinessRules,
         ILogger<UserService> logger, IValidator<UserRegisterDto> userRegisterDtoValidator, IValidator<UserUpdateDto> userUpdateDtoValidator,
-        IValidator<UserPasswordChangeDto> userPasswordChangeDtoValidator)
+        IValidator<UserPasswordChangeDto> userPasswordChangeDtoValidator, IValidator<IndividualUserUpdateDto> individualUserUpdateDtoValidator,
+        IValidator<CorporateUserUpdateDto> corporateUserUpdateDtoValidator)
     {
         _userRepository = userRepository;
         _hasher = hasher;
@@ -44,6 +47,8 @@ public class UserService : IUserService
         _userRegisterDtoValidator = userRegisterDtoValidator;
         _userUpdateDtoValidator = userUpdateDtoValidator;
         _userPasswordChangeDtoValidator = userPasswordChangeDtoValidator;
+        _individualUserUpdateDtoValidator = individualUserUpdateDtoValidator;
+        _corporateUserUpdateDtoValidator = corporateUserUpdateDtoValidator;
     }
 
     public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken)
@@ -165,38 +170,44 @@ public class UserService : IUserService
         }
     }
 
-
-    public async Task<IDataResult<UserDto>> UpdateUserAsync(UserUpdateDto dto, CancellationToken cancellationToken)
+    public async Task<IDataResult<UserDto>> UpdateIndividualUserAsync(IndividualUserUpdateDto dto, CancellationToken cancellationToken)
     {
-        try
+        var validationResult = await _individualUserUpdateDtoValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
         {
-            var validationResult = await _userUpdateDtoValidator.ValidateAsync(dto);
-            if (!validationResult.IsValid)
-            {
-                return new DataResult<UserDto>(ResultStatus.Error, "Doğrulama hatası: " +
-                    string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
-            }
-
-            await _userBusinessRules.UserNameCannotBeDuplicatedWhenUpdated(dto.Id, dto.Username);
-            await _userBusinessRules.EmailCannotBeDuplicatedWhenUpdated(dto.Id, dto.Username);
-
-            var user = await _userRepository.GetAsync(u => u.Id == dto.Id);
-            if (user == null)
-            {
-                return new DataResult<UserDto>(ResultStatus.Error, "Kullanıcı bulunamadı.", null);
-            }
-
-            _mapper.Map(dto, user);
-            await _userRepository.UpdateAsync(user);
-            var updatedUserDto = _mapper.Map<UserDto>(user);
-
-            return new DataResult<UserDto>(ResultStatus.Success, "Kullanıcı başarıyla güncellendi.", updatedUserDto);
+            return new DataResult<UserDto>(ResultStatus.Error, "Validation failed", null);
         }
-        catch (Exception ex)
+
+        var user = await _userRepository.GetAsync(u => u.Id == dto.Id);
+        if (user is IndividualUser individualUser)
         {
-            _logger.LogError(ex, "Error in {MethodName}. Failed to update user. Details: {ExceptionMessage}", nameof(UpdateUserAsync), ex.Message);
-            return new DataResult<UserDto>(ResultStatus.Error, "Kullanıcı güncellenirken hata oluştu.", data: null, ex);
+            _mapper.Map(dto, individualUser);
+            await _userRepository.UpdateAsync(individualUser);
+            var updatedUserDto = _mapper.Map<UserDto>(individualUser);
+            return new DataResult<UserDto>(ResultStatus.Success, "User updated successfully", updatedUserDto);
         }
+
+        return new DataResult<UserDto>(ResultStatus.Error, "Individual user not found", null);
+    }
+
+    public async Task<IDataResult<UserDto>> UpdateCorporateUserAsync(CorporateUserUpdateDto dto, CancellationToken cancellationToken)
+    {
+        var validationResult = await _corporateUserUpdateDtoValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+        {
+            return new DataResult<UserDto>(ResultStatus.Error, "Validation failed", null);
+        }
+
+        var user = await _userRepository.GetAsync(u => u.Id == dto.Id);
+        if (user is CorporateUser corporateUser)
+        {
+            _mapper.Map(dto, corporateUser);
+            await _userRepository.UpdateAsync(corporateUser);
+            var updatedUserDto = _mapper.Map<UserDto>(corporateUser);
+            return new DataResult<UserDto>(ResultStatus.Success, "User updated successfully", updatedUserDto);
+        }
+
+        return new DataResult<UserDto>(ResultStatus.Error, "Corporate user not found", null);
     }
 
     public async Task<IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
@@ -261,8 +272,18 @@ public class UserService : IUserService
     {
         try
         {
-            User? user = await _userRepository.GetAsync(x => x.Id == userId, cancellationToken: cancellationToken);
-            return _mapper.Map<UserDto>(user);
+            var user = await _userRepository.GetAsync(x => x.Id == userId, cancellationToken: cancellationToken);
+
+            if (user is IndividualUser individualUser)
+            {
+                return _mapper.Map<UserDto>(individualUser);
+            }
+            else if (user is CorporateUser corporateUser)
+            {
+                return _mapper.Map<UserDto>(corporateUser);
+            }
+
+            return null;
         }
         catch (Exception ex)
         {
@@ -270,6 +291,7 @@ public class UserService : IUserService
             return null;
         }
     }
+
 
     public async Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false)
     {
@@ -320,6 +342,8 @@ public class UserService : IUserService
         }
     }
 
-
-
+    public Task<IDataResult<UserDto>> UpdateUserAsync(UserUpdateDto dto, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

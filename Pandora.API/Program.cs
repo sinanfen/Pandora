@@ -113,6 +113,7 @@ Log.Logger = new LoggerConfiguration()
             {"LogEvent", new LogEventSerializedColumnWriter()},
         })
     .Enrich.FromLogContext()
+    .Filter.ByExcluding(logEvent => logEvent.MessageTemplate.Text.Contains("The query uses a row limiting operator"))
     .CreateLogger();
 
 builder.Host.UseSerilog();
