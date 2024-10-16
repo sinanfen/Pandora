@@ -147,12 +147,31 @@ public class UserService : IUserService
             await _userBusinessRules.EmailCannotBeDuplicatedWhenInserted(dto.Email);
 
             User user;
-            if (dto.UserType == UserType.Individual)
-                user = _mapper.Map<IndividualUser>(dto);
-            else if (dto.UserType == UserType.Corporate)
-                user = _mapper.Map<CorporateUser>(dto);
-            else
-                return new DataResult<UserDto>(ResultStatus.Error, "Geçersiz kullanıcı türü", null);
+            switch (dto.UserType)
+            {
+                case UserType.Individual:
+                    var individualDto = _mapper.Map<IndividualUser>(dto);
+                    if (dto is IndividualUserRegisterDto individualDetails)
+                    {
+                        individualDto.FirstName = individualDetails.FirstName;
+                        individualDto.LastName = individualDetails.LastName;
+                    }
+                    user = individualDto;
+                    break;
+
+                case UserType.Corporate:
+                    var corporateDto = _mapper.Map<CorporateUser>(dto);
+                    if (dto is CorporateUserRegisterDto corporateDetails)
+                    {
+                        corporateDto.CompanyName = corporateDetails.CompanyName;
+                        corporateDto.TaxNumber = corporateDetails.TaxNumber;
+                    }
+                    user = corporateDto;
+                    break;
+
+                default:
+                    return new DataResult<UserDto>(ResultStatus.Error, "Geçersiz kullanıcı türü", null);
+            }
 
             user.NormalizedUsername = dto.Username.ToUpperInvariant();
             user.NormalizedEmail = dto.Email.ToUpperInvariant();

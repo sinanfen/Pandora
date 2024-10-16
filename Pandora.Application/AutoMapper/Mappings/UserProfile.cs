@@ -27,6 +27,17 @@ public class UserProfile : Profile
         CreateMap<CorporateUser, UserDto>()
             .IncludeBase<User, UserDto>();
 
+        // Mapping for IndividualUser from IndividualUserRegisterDto
+        CreateMap<IndividualUserRegisterDto, IndividualUser>()
+            .IncludeBase<UserRegisterDto, IndividualUser>();
+
+        // Mapping for CorporateUser from CorporateUserRegisterDto
+        CreateMap<CorporateUserRegisterDto, CorporateUser>()
+            .IncludeBase<UserRegisterDto, CorporateUser>();
+
+        // General User mappings for Individual and Corporate users
+        CreateMap<UserRegisterDto, IndividualUser>();
+        CreateMap<UserRegisterDto, CorporateUser>();
 
         // General User mappings
         CreateMap<User, UserDto>().ReverseMap();

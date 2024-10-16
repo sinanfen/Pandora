@@ -24,18 +24,22 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(UserLoginDto dto, CancellationToken cancellationToken)
     {
         var result = await _authService.LoginAsync(dto, cancellationToken);
-        if (result.ResultStatus == ResultStatus.Success)
+        if (result.ResultStatus != ResultStatus.Success)
         {
-            return Ok(new { Token = result.Data, Message = result.Message });
+            return Ok(new { Success = false, Message = result.Message });
         }
-        return Unauthorized(result.Message);
+        return Ok(new { Success = true, Token = result.Data, Message = result.Message });
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync(UserRegisterDto userRegisterDto, CancellationToken cancellationToken)
     {
         var result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
-        return Ok(result);
+        if (result.ResultStatus != ResultStatus.Success)
+        {
+            return Ok(new { Success = false, Message = result.Message });
+        }
+        return Ok(new { Success = true, Data = result.Data, Message = result.Message });
     }
 
     [Authorize]
@@ -43,12 +47,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ChangePasswordAsync([FromBody] UserPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken)
     {
         var result = await _userService.ChangePasswordAsync(userPasswordChangeDto, cancellationToken);
-        if (result.ResultStatus == ResultStatus.Error)
+        if (result.ResultStatus != ResultStatus.Success)
         {
-            return BadRequest(new { Message = result.Message }); // Return structured JSON
+            return BadRequest(result); // Return structured JSON
         }
-
-        return Ok(new { Message = result.Message }); // Success message in structured JSON
+        return Ok(result); // Success message in structured JSON
     }
 
     // Token doğrulama
