@@ -5,6 +5,6 @@ namespace Pandora.Application.Interfaces.Repositories;
 
 public interface IUserRepository : IAsyncRepository<User, Guid>, IRepository<User, Guid>
 {
-    Task<User?> GetByEmailAsync(string email);
-    Task<User?> GetByUsernameAsync(string username);
+    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken);
+    Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken);
 }

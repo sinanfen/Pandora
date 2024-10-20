@@ -23,37 +23,39 @@ public class AuthService : IAuthService
     private readonly IHasher _hasher;
     private readonly IUserService _userService;
     private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
     private readonly IMapper _mapper;
 
-    public AuthService(IConfiguration configuration, IHasher hasher, IUserService userService, IMapper mapper, IUserRepository userRepository)
+    public AuthService(IConfiguration configuration, IHasher hasher, IUserService userService, IMapper mapper, IUserRepository userRepository,
+        IRoleRepository roleRepository)
     {
         _configuration = configuration;
         _hasher = hasher;
         _userService = userService;
         _mapper = mapper;
         _userRepository = userRepository;
+        _roleRepository = roleRepository;
     }
 
     // JWT Token üretme
-    public string GenerateToken(UserDto user)
+    public string GenerateToken(UserDto user, List<string> roles)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]);
-
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+        };
+        roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new Claim[]
-            {
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.UserType.ToString())
-            }),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:ExpiresInMinutes"])),
             Issuer = _configuration["JwtSettings:Issuer"], // Issuer (token'ı oluşturan taraf)
             Audience = _configuration["JwtSettings:Audience"], // Audience (token'ı kullanacak taraf)
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
-
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
@@ -77,9 +79,9 @@ public class AuthService : IAuthService
 
         userEntity.LastLoginDate = DateTime.UtcNow;
         await _userRepository.UpdateAsync(userEntity);
-
+        var roles = await _roleRepository.GetUserRolesAsync(userEntity.Id, cancellationToken);
         var userDto = _mapper.Map<UserDto>(userEntity);
-        var token = GenerateToken(userDto);
+        var token = GenerateToken(userDto, roles);
 
         return new DataResult<string>(ResultStatus.Success, "Giriş başarılı", token);
     }

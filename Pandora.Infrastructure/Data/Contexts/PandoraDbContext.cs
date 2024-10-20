@@ -10,14 +10,24 @@ public class PandoraDbContext : DbContext
     public PandoraDbContext(DbContextOptions<PandoraDbContext> options) : base(options) { }
 
     public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<PasswordVault> passwordVaults { get; set; }
     public DbSet<PersonalVault> PersonalVaults { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Automatically apply all configurations from the current assembly
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        base.OnModelCreating(modelBuilder);
+        try
+        {
+            // Automatically apply all configurations from the current assembly
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            base.OnModelCreating(modelBuilder);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 }

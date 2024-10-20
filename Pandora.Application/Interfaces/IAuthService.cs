@@ -6,7 +6,7 @@ namespace Pandora.Application.Interfaces;
 
 public interface IAuthService
 {
-    string GenerateToken(UserDto user);
+    string GenerateToken(UserDto user, List<string> roles);
     Task<IDataResult<string>> LoginAsync(UserLoginDto dto,CancellationToken cancellationToken);
     bool VerifyPassword(string hashedPassword, string plainPassword);
     ClaimsPrincipal GetPrincipalFromExpiredToken(string token);

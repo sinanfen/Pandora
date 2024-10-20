@@ -3,13 +3,15 @@
 namespace Pandora.Core.Domain.Entities;
 
 // Core/Domain/Entities/User.cs
-public abstract class User : Entity<Guid>
+public class User : Entity<Guid>
 {
     // Basic identity fields
     public string Username { get; set; }
     public string NormalizedUsername { get; set; } // Used for case-insensitive username checks
     public string Email { get; set; }
     public string NormalizedEmail { get; set; } // Used for case-insensitive email checks
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
     public string PasswordHash { get; set; } // Hashed password for security
     public string SecurityStamp { get; set; } // Security stamp for verifying user identity changes (optional)
 
@@ -20,9 +22,6 @@ public abstract class User : Entity<Guid>
 
     // Two-factor authentication
     public bool TwoFactorEnabled { get; set; }
-
-    // User type: Individual or Corporate
-    public UserType UserType { get; set; } // Enum to differentiate between Individual and Corporate
 
     // Optional user information
     public string PhoneNumber { get; set; }
@@ -36,12 +35,13 @@ public abstract class User : Entity<Guid>
     public ICollection<PasswordVault> PasswordVaults { get; set; }
     public ICollection<PersonalVault> PersonalVaults { get; set; }
     public ICollection<Category> Categories { get; set; }
+    public ICollection<UserRole> UserRoles { get; set; } // A user can have many roles
 
     public User() : base(Guid.NewGuid())
     {
         PasswordVaults = new List<PasswordVault>();
         PersonalVaults = new List<PersonalVault>();
         Categories = new List<Category>();
+        UserRoles = new List<UserRole>();
     }
 }
-

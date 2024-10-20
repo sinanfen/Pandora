@@ -10,6 +10,7 @@ public static class InfrastructureServicesExtension
     {
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IPasswordVaultRepository, PasswordVaultRepository>();
         services.AddScoped<IPersonalVaultRepository, PersonalVaultRepository>();

@@ -29,15 +29,11 @@ public interface IUserService
     Task<User?> GetEntityByEmailAsync(string email, CancellationToken cancellationToken);
     Task<User?> GetEntityByUsernameAsync(string username, CancellationToken cancellationToken);
     Task<IDataResult<UserDto>> RegisterUserAsync(UserRegisterDto dto, CancellationToken cancellationToken);
-    Task<IDataResult<UserDto>> UpdateUserAsync(UserUpdateDto dto, CancellationToken cancellationToken);
-    Task<IDataResult<UserDto>> UpdateIndividualUserAsync(IndividualUserUpdateDto dto, CancellationToken cancellationToken);
-    Task<IDataResult<UserDto>> UpdateCorporateUserAsync(CorporateUserUpdateDto dto, CancellationToken cancellationToken);
+    Task<IDataResult<UserDto>> UpdateAsync(UserUpdateDto dto, CancellationToken cancellationToken);
     Task<IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken);
     Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false);
     Task<IResult> ChangePasswordAsync(UserPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken);
     Task<string> GeneratePasswordHashAsync(string password);
     Task<bool> VerifyPasswordHashAsync(string hashedPassword, string password);
-
-
 }

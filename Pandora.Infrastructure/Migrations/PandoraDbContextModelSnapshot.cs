@@ -192,6 +192,56 @@ namespace Pandora.Infrastructure.Migrations
                     b.ToTable("PersonalVaults");
                 });
 
+            modelBuilder.Entity("Pandora.Core.Domain.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedDate");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedDate");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("07250819-3df0-4bc3-acf1-0ee372d43bbe"),
+                            CreatedDate = new DateTime(2024, 10, 20, 0, 46, 41, 36, DateTimeKind.Utc).AddTicks(9348),
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = new Guid("a098e93d-cfaf-45a7-a47e-57c10dd92afd"),
+                            CreatedDate = new DateTime(2024, 10, 20, 0, 46, 41, 36, DateTimeKind.Utc).AddTicks(9354),
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
+                });
+
             modelBuilder.Entity("Pandora.Core.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -216,8 +266,16 @@ namespace Pandora.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("LastLoginDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("LastPasswordChangeDate")
                         .HasColumnType("timestamp with time zone");
@@ -261,9 +319,6 @@ namespace Pandora.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("UpdatedDate");
 
-                    b.Property<int>("UserType")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -279,39 +334,72 @@ namespace Pandora.Infrastructure.Migrations
 
                     b.ToTable("Users", (string)null);
 
-                    b.HasDiscriminator<int>("UserType");
-
-                    b.UseTphMappingStrategy();
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("6854a44d-631e-439b-8f8e-09e8e4576a95"),
+                            CreatedDate = new DateTime(2024, 10, 20, 0, 46, 41, 37, DateTimeKind.Utc).AddTicks(2698),
+                            Email = "admin@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Admin",
+                            LastLoginDate = new DateTime(2024, 10, 20, 0, 46, 41, 37, DateTimeKind.Utc).AddTicks(3114),
+                            LastName = "Admin",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                            NormalizedUsername = "ADMIN",
+                            PasswordHash = "d48a3b22dbfe455ae3438f7d89eb62875ddfc2234d2acc6f32132385d049f65752a5858dbb19006ff4882134264607869639798e06ec48928997f72c4ed31be5",
+                            PhoneNumber = "1234567890",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "8a9ad6bd-54d0-4c6c-9a04-191daa925c12",
+                            TwoFactorEnabled = false,
+                            Username = "admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("49a58a56-bcbd-45fc-a8f8-dec748059765"),
+                            CreatedDate = new DateTime(2024, 10, 20, 0, 46, 41, 37, DateTimeKind.Utc).AddTicks(3117),
+                            Email = "user@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "User",
+                            LastLoginDate = new DateTime(2024, 10, 20, 0, 46, 41, 37, DateTimeKind.Utc).AddTicks(3182),
+                            LastName = "User",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "USER@EXAMPLE.COM",
+                            NormalizedUsername = "USER",
+                            PasswordHash = "e86424a11261f6897e28276662338ebfd4b3230c1295647590ab8c510fd1557355b92fc9051296f7ac5c331a52fa5c2d22cf76c2fc61fcbd436a317e02bf53b3",
+                            PhoneNumber = "1234567890",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "2af9f001-08b2-4198-8bc5-b884b1cd4507",
+                            TwoFactorEnabled = false,
+                            Username = "user"
+                        });
                 });
 
-            modelBuilder.Entity("Pandora.Core.Domain.Entities.CorporateUser", b =>
+            modelBuilder.Entity("Pandora.Core.Domain.Entities.UserRole", b =>
                 {
-                    b.HasBaseType("Pandora.Core.Domain.Entities.User");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("TaxNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.HasKey("UserId", "RoleId");
 
-                    b.HasDiscriminator().HasValue(1);
-                });
+                    b.HasIndex("RoleId");
 
-            modelBuilder.Entity("Pandora.Core.Domain.Entities.IndividualUser", b =>
-                {
-                    b.HasBaseType("Pandora.Core.Domain.Entities.User");
+                    b.ToTable("UserRoles", (string)null);
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasDiscriminator().HasValue(0);
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("6854a44d-631e-439b-8f8e-09e8e4576a95"),
+                            RoleId = new Guid("07250819-3df0-4bc3-acf1-0ee372d43bbe")
+                        },
+                        new
+                        {
+                            UserId = new Guid("49a58a56-bcbd-45fc-a8f8-dec748059765"),
+                            RoleId = new Guid("a098e93d-cfaf-45a7-a47e-57c10dd92afd")
+                        });
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.Category", b =>
@@ -361,11 +449,35 @@ namespace Pandora.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Pandora.Core.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("Pandora.Core.Domain.Entities.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pandora.Core.Domain.Entities.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Pandora.Core.Domain.Entities.Category", b =>
                 {
                     b.Navigation("PasswordVaults");
 
                     b.Navigation("PersonalVaults");
+                });
+
+            modelBuilder.Entity("Pandora.Core.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.User", b =>
@@ -375,6 +487,8 @@ namespace Pandora.Infrastructure.Migrations
                     b.Navigation("PasswordVaults");
 
                     b.Navigation("PersonalVaults");
+
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

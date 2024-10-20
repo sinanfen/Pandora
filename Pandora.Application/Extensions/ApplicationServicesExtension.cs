@@ -15,6 +15,7 @@ public static class ApplicationServicesExtension
     {
         // Application Services
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IPasswordVaultService, PasswordVaultService>();
         services.AddScoped<IPersonalVaultService, PersonalVaultService>();
