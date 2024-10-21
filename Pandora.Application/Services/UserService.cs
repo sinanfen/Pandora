@@ -42,7 +42,7 @@ public class UserService : IUserService
         _logger = logger;
         _userRegisterDtoValidator = userRegisterDtoValidator;
         _userUpdateDtoValidator = userUpdateDtoValidator;
-        _userPasswordChangeDtoValidator = userPasswordChangeDtoValidator;      
+        _userPasswordChangeDtoValidator = userPasswordChangeDtoValidator;
     }
 
     public async Task<UserDto?> GetByEmailAsync(string email, CancellationToken cancellationToken)
@@ -227,7 +227,7 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get user. Details: {ExceptionMessage}", nameof(GetAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -241,7 +241,7 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get paged list of user. Details: {ExceptionMessage}", nameof(GetListAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -262,7 +262,7 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get user. Details: {ExceptionMessage}", nameof(GetByIdAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -277,7 +277,7 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get list of user. Details: {ExceptionMessage}", nameof(GetAllAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -313,5 +313,5 @@ public class UserService : IUserService
             _logger.LogError(ex, "Error occurred while changing password for user ID {UserId}: {ExceptionMessage}", userPasswordChangeDto.Id, ex.Message);
             return new Result(ResultStatus.Error, "Şifre değiştirilirken bir hata oluştu.");
         }
-    }  
+    }
 }

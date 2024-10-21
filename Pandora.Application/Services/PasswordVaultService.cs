@@ -119,15 +119,10 @@ public class PasswordVaultService : IPasswordVaultService
         {
             var passwordVaults = await _passwordVaultRepository.GetListAsync(cancellationToken: cancellationToken);
             if (passwordVaults == null || !passwordVaults.Items.Any())
-            {
-                _logger.LogError("Error in {MethodName}. Failed to get all password vaults.", nameof(GetAllAsync));
-                return null;
-            }
+                return new List<PasswordVaultDto>();
 
             foreach (var vault in passwordVaults.Items)
-            {
                 DecryptFields(vault);
-            }
 
             return _mapper.Map<List<PasswordVaultDto>>(passwordVaults.Items);
         }
@@ -144,15 +139,10 @@ public class PasswordVaultService : IPasswordVaultService
         {
             var passwordVaults = await _passwordVaultRepository.GetListAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
             if (passwordVaults == null || !passwordVaults.Items.Any())
-            {
-                _logger.LogError("Error in {MethodName}. Failed to get all password vaults.", nameof(GetAllAsync));
-                return null;
-            }
+                return new List<PasswordVaultDto>();
 
             foreach (var vault in passwordVaults.Items)
-            {
                 DecryptFields(vault);
-            }
 
             return _mapper.Map<List<PasswordVaultDto>>(passwordVaults.Items);
         }
@@ -174,10 +164,7 @@ public class PasswordVaultService : IPasswordVaultService
         {
             var passwordVault = await _passwordVaultRepository.GetAsync(predicate, include, withDeleted, enableTracking, cancellationToken);
             if (passwordVault == null)
-            {
-                _logger.LogWarning("Password vault not found.");
                 return null;
-            }
 
             DecryptFields(passwordVault);
             return _mapper.Map<PasswordVaultDto>(passwordVault);
@@ -221,9 +208,7 @@ public class PasswordVaultService : IPasswordVaultService
     {
         var passwordVaults = await _passwordVaultRepository.GetListAsync(predicate, orderBy, include, index, size, withDeleted, enableTracking, cancellationToken);
         foreach (var vault in passwordVaults.Items)
-        {
             DecryptFields(vault);
-        }
 
         return _mapper.Map<Paginate<PasswordVaultDto>>(passwordVaults);
     }

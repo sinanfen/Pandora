@@ -39,7 +39,6 @@ public class PersonalVaultsController : ControllerBase
     {
         // Kullanıcının kimliğini al
         var userId = GetLoggedInUserId();
-
         var personalVault = await _personalVaultService.GetByIdAndUserAsync(personalVaultId, userId, cancellationToken);
         if (personalVault == null)
             return NotFound("Personal vault bulunamadı.");
@@ -52,7 +51,6 @@ public class PersonalVaultsController : ControllerBase
     public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
         var userId = GetLoggedInUserId();
-
         var vaults = await _personalVaultService.GetAllByUserAsync(userId, cancellationToken);
         return Ok(vaults);
     }

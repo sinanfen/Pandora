@@ -13,6 +13,7 @@ using Pandora.Core.Domain.Paging;
 using FluentValidation;
 using Pandora.Application.BusinessRules;
 using Pandora.Shared.DTOs.CategoryDTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Pandora.Application.Services;
 
@@ -122,7 +123,7 @@ public class CategoryService : ICategoryService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get list of category. Details: {ExceptionMessage}", nameof(GetAllAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -137,7 +138,7 @@ public class CategoryService : ICategoryService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get list of category. Details: {ExceptionMessage}", nameof(GetAllAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -151,7 +152,7 @@ public class CategoryService : ICategoryService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get category. Details: {ExceptionMessage}", nameof(GetAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -165,7 +166,7 @@ public class CategoryService : ICategoryService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get category. Details: {ExceptionMessage}", nameof(GetByIdAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -179,7 +180,7 @@ public class CategoryService : ICategoryService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get category. Details: {ExceptionMessage}", nameof(GetByIdAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 
@@ -193,7 +194,7 @@ public class CategoryService : ICategoryService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get paged list of category. Details: {ExceptionMessage}", nameof(GetListAsync), ex.Message);
-            return null;
+            throw;
         }
     }
 }

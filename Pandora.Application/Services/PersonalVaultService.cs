@@ -13,6 +13,7 @@ using Pandora.CrossCuttingConcerns.ExceptionHandling;
 using Pandora.Application.Validators.PersonalVaultValidators;
 using Microsoft.Extensions.Logging;
 using Pandora.Shared.DTOs.PersonalVaultDTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Pandora.Application.Services;
 
@@ -44,10 +45,8 @@ public class PersonalVaultService : IPersonalVaultService
         {
             var validationResult = await _personalVaultAddDtoValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return new DataResult<PersonalVaultDto>(ResultStatus.Error, "Validation Error: " +
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
-            }
 
             var personalVault = _mapper.Map<PersonalVault>(dto);
 
@@ -72,10 +71,8 @@ public class PersonalVaultService : IPersonalVaultService
         {
             var validationResult = await _personalVaultUpdateDtoValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return new DataResult<PersonalVaultDto>(ResultStatus.Error, "Doğrulama hatası: " +
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
-            }
 
             var personalVault = await _personalVaultRepository.GetAsync(x => x.Id == dto.Id, cancellationToken: cancellationToken);
             if (personalVault == null)
@@ -125,15 +122,10 @@ public class PersonalVaultService : IPersonalVaultService
         {
             var personalVaults = await _personalVaultRepository.GetListAsync(cancellationToken: cancellationToken);
             if (personalVaults == null || !personalVaults.Items.Any())
-            {
-                _logger.LogError("Error in {MethodName}. Failed to get all personal vaults.", nameof(GetAllAsync));
-                return null;
-            }
+                return new List<PersonalVaultDto>();
 
             foreach (var vault in personalVaults.Items)
-            {
                 DecryptFields(vault);
-            }
 
             var resultDtos = _mapper.Map<List<PersonalVaultDto>>(personalVaults.Items);
             return resultDtos;
@@ -149,17 +141,16 @@ public class PersonalVaultService : IPersonalVaultService
     {
         try
         {
-            var personalVaults = await _personalVaultRepository.GetListAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
+            var personalVaults = await _personalVaultRepository
+                .GetListAsync(x => x
+                .UserId == userId,
+                include: x => x.Include(x => x.Category),
+                cancellationToken: cancellationToken);
             if (personalVaults == null || !personalVaults.Items.Any())
-            {
-                _logger.LogError("Error in {MethodName}. Failed to get all personal vaults.", nameof(GetAllAsync));
-                return null;
-            }
+                return new List<PersonalVaultDto>();
 
             foreach (var vault in personalVaults.Items)
-            {
                 DecryptFields(vault);
-            }
 
             var resultDtos = _mapper.Map<List<PersonalVaultDto>>(personalVaults.Items);
             return resultDtos;
@@ -183,10 +174,7 @@ public class PersonalVaultService : IPersonalVaultService
             var personalVault = await _personalVaultRepository.GetAsync(predicate, include, withDeleted, enableTracking, cancellationToken);
 
             if (personalVault == null)
-            {
-                _logger.LogWarning("Personal vault not found.");
                 return null;
-            }
 
             DecryptFields(personalVault);
 
@@ -254,9 +242,7 @@ public class PersonalVaultService : IPersonalVaultService
             var personalVaults = await _personalVaultRepository.GetListAsync(predicate, orderBy, include, index, size, withDeleted, enableTracking, cancellationToken);
 
             foreach (var vault in personalVaults.Items)
-            {
                 DecryptFields(vault);
-            }
 
             return _mapper.Map<Paginate<PersonalVaultDto>>(personalVaults);
         }

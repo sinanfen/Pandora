@@ -36,9 +36,7 @@ public class CategoriesController : ControllerBase
 
         var result = await _categoryService.GetByIdAndUserAsync(categoryId, userId, cancellationToken);
         if (result == null)
-        {
             return NotFound();
-        }
         return Ok(result);
     }
 
@@ -54,12 +52,10 @@ public class CategoriesController : ControllerBase
 
     // POST: api/categories/add
     [HttpPost]
-    public async Task<IActionResult> AddAsync([FromBody] CategoryAddDto categoryAddDto,CancellationToken cancellationToken)
+    public async Task<IActionResult> AddAsync([FromBody] CategoryAddDto categoryAddDto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var result = await _categoryService.AddAsync(categoryAddDto, cancellationToken);
         return Ok(result);
@@ -70,9 +66,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> UpdateAsync([FromBody] CategoryUpdateDto categoryUpdateDto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
         var categoryDto = await _categoryService.GetByIdAsync(categoryUpdateDto.Id, cancellationToken);
@@ -82,9 +76,7 @@ public class CategoriesController : ControllerBase
 
         var result = await _categoryService.UpdateAsync(categoryUpdateDto, cancellationToken);
         if (result == null)
-        {
             return NotFound();
-        }
 
         return Ok(result); // 200 OK
     }
@@ -101,9 +93,7 @@ public class CategoriesController : ControllerBase
 
         var result = await _categoryService.DeleteAsync(categoryId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
-        {
             return NotFound();
-        }
 
         return Ok(result);
     }

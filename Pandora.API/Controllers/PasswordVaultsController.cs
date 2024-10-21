@@ -47,7 +47,6 @@ public class PasswordVaultsController : ControllerBase
     public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
         var userId = GetLoggedInUserId();
-
         var vaults = await _passwordVaultService.GetAllByUserAsync(userId, cancellationToken);
         return Ok(vaults);
     }
