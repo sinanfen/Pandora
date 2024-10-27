@@ -18,7 +18,7 @@ namespace Pandora.Application.Validators.PasswordVaultValidators
                 .MinimumLength(5).WithMessage("Kullanıcı adı veya email en az 5 karakter olmalıdır.");
 
             // CurrentPassword field validation
-            RuleFor(x => x.CurrentPassword)
+            RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("Mevcut şifre boş olamaz.")
                 .MinimumLength(8).WithMessage("Mevcut şifre en az 8 karakter olmalıdır.");
 

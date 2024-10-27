@@ -7,11 +7,13 @@ public class PasswordVaultBusinessRules
 {
     private readonly IPasswordVaultRepository _passwordVaultRepository;
     private readonly IHasher _hasher;
+    private readonly IEncryption _encryption;
 
-    public PasswordVaultBusinessRules(IPasswordVaultRepository passwordVaultRepository, IHasher hasher)
+    public PasswordVaultBusinessRules(IPasswordVaultRepository passwordVaultRepository, IHasher hasher, IEncryption encryption)
     {
         _passwordVaultRepository = passwordVaultRepository;
         _hasher = hasher;
+        _encryption = encryption;
     }
 
     public void EnsurePasswordMeetsComplexityRules(string password)
@@ -52,15 +54,13 @@ public class PasswordVaultBusinessRules
         var passwordVault = await _passwordVaultRepository.GetAsync(pv => pv.Id == passwordVaultId);
 
         if (passwordVault == null)
-        {
             throw new BusinessException("Şifre kasası bulunamadı.");
-        }
 
-        var isValidPassword = _hasher.VerifyHashedPassword(passwordVault.PasswordHash, currentPassword, HashAlgorithmType.Sha512);
+        // AES ile şifrelenmiş şifreyi çöz ve karşılaştır
+        var decryptedPassword = _encryption.Decrypt(passwordVault.PasswordHash);
 
-        if (!isValidPassword)
-        {
+        if (decryptedPassword != currentPassword)
             throw new BusinessException("Mevcut şifre doğru değil.");
-        }
     }
+
 }

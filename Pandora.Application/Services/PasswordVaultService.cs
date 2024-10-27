@@ -56,9 +56,6 @@ public class PasswordVaultService : IPasswordVaultService
 
             EncryptFields(passwordVault, dto);
 
-            // Hash the password
-            passwordVault.PasswordHash = _hasher.HashPassword(dto.Password, HashAlgorithmType.Sha512);
-
             await _passwordVaultRepository.AddAsync(passwordVault, cancellationToken);
 
             var resultDto = _mapper.Map<PasswordVaultDto>(passwordVault);
@@ -83,14 +80,19 @@ public class PasswordVaultService : IPasswordVaultService
             if (passwordVault == null)
                 return new DataResult<PasswordVaultDto>(ResultStatus.Error, "Password vault not found.", null);
 
-            await _passwordVaultBusinessRules.CheckCurrentPasswordAsync(dto.Id, dto.CurrentPassword);
+            // Mevcut şifreyi doğrula
+            await _passwordVaultBusinessRules.CheckCurrentPasswordAsync(dto.Id, dto.Password);
 
+            // Yeni şifrenin karmaşıklığını doğrula
             _passwordVaultBusinessRules.EnsurePasswordMeetsComplexityRules(dto.NewPassword);
 
-            passwordVault.PasswordHash = _hasher.HashPassword(dto.NewPassword, HashAlgorithmType.Sha512);
-            _mapper.Map(dto, passwordVault);
+            // Yeni şifreyi AES ile şifrele ve kaydet
+            passwordVault.PasswordHash = _encryption.Encrypt(dto.NewPassword);
 
+            // Diğer alanları güncelle
+            _mapper.Map(dto, passwordVault);
             EncryptFields(passwordVault, dto);
+
             await _passwordVaultRepository.UpdateAsync(passwordVault, cancellationToken);
 
             var resultDto = _mapper.Map<PasswordVaultDto>(passwordVault);
@@ -102,6 +104,7 @@ public class PasswordVaultService : IPasswordVaultService
             return new DataResult<PasswordVaultDto>(ResultStatus.Error, "An error occurred while updating the password vault.", null);
         }
     }
+
 
     public async Task<IResult> DeleteAsync(Guid passwordVaultId, CancellationToken cancellationToken)
     {
@@ -217,6 +220,7 @@ public class PasswordVaultService : IPasswordVaultService
     {
         passwordVault.SecureSiteName = _encryption.Encrypt(dto.SiteName);
         passwordVault.SecureNotes = _encryption.Encrypt(dto.Notes);
+        passwordVault.PasswordHash = _encryption.Encrypt(dto.Password);
         passwordVault.SecureUsernameOrEmail = _encryption.Encrypt(dto.UsernameOrEmail);
     }
 
@@ -224,6 +228,7 @@ public class PasswordVaultService : IPasswordVaultService
     {
         passwordVault.SecureSiteName = _encryption.Decrypt(passwordVault.SecureSiteName);
         passwordVault.SecureNotes = _encryption.Decrypt(passwordVault.SecureNotes);
+        passwordVault.PasswordHash = _encryption.Decrypt(passwordVault.PasswordHash);
         passwordVault.SecureUsernameOrEmail = _encryption.Decrypt(passwordVault.SecureUsernameOrEmail);
     }
 }
