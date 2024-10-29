@@ -10,7 +10,6 @@ using Pandora.Application.Validators.PasswordVaultValidators;
 using Pandora.Core.Domain.Entities;
 using Pandora.Core.Persistence.Paging;
 using System.Linq.Expressions;
-using System.Security.Authentication;
 using Microsoft.Extensions.Logging;
 using Pandora.CrossCuttingConcerns.ExceptionHandling;
 using Pandora.Shared.DTOs.PasswordVaultDTOs;

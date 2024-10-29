@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pandora.Application.Interfaces;
-using Pandora.Application.Security.Interfaces;
 using Pandora.Application.Utilities.Results;
 using Pandora.Shared.DTOs.PersonalVaultDTOs;
 using System.Security.Claims;
@@ -14,14 +13,10 @@ namespace Pandora.API.Controllers;
 public class PersonalVaultsController : ControllerBase
 {
     private readonly IPersonalVaultService _personalVaultService;
-    private readonly IHasher _hasher;
-    private readonly IEncryption _encryption;
 
-    public PersonalVaultsController(IPersonalVaultService personalVaultService, IHasher hasher, IEncryption encryption)
+    public PersonalVaultsController(IPersonalVaultService personalVaultService)
     {
-        _personalVaultService = personalVaultService;
-        _hasher = hasher;
-        _encryption = encryption;
+        _personalVaultService = personalVaultService;   
     }
 
     private Guid GetLoggedInUserId()

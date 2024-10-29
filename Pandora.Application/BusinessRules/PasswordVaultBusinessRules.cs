@@ -57,9 +57,9 @@ public class PasswordVaultBusinessRules
             throw new BusinessException("Şifre kasası bulunamadı.");
 
         // AES ile şifrelenmiş şifreyi çöz ve karşılaştır
-        var decryptedPassword = _encryption.Decrypt(passwordVault.PasswordHash);
+        //var decryptedPassword = _encryption.Decrypt(passwordVault.PasswordHash);
 
-        if (decryptedPassword != currentPassword)
+        if (!passwordVault.PasswordHash.Equals(currentPassword))
             throw new BusinessException("Mevcut şifre doğru değil.");
     }
 
