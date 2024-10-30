@@ -80,7 +80,7 @@ public class PasswordVaultService : IPasswordVaultService
                 return new DataResult<PasswordVaultDto>(ResultStatus.Error, "Password vault not found.", null);
 
             // Mevcut şifreyi doğrula
-            await _passwordVaultBusinessRules.CheckCurrentPasswordAsync(dto.Id, dto.Password);
+            //await _passwordVaultBusinessRules.CheckCurrentPasswordAsync(dto.Id, dto.Password);
 
             // Yeni şifrenin karmaşıklığını doğrula
             _passwordVaultBusinessRules.EnsurePasswordMeetsComplexityRules(dto.NewPassword);
