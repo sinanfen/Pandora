@@ -1,4 +1,4 @@
-﻿using Pandora.Application.Utilities.Results.Interfaces;
+﻿using Pandora.Application.Interfaces.Results;
 using Pandora.Shared.DTOs.UserDTOs;
 using System.Security.Claims;
 

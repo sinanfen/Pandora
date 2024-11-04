@@ -1,10 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Pandora.Application.Interfaces;
-using Pandora.Application.Security.Interfaces;
-using Pandora.Application.Utilities.Results.Implementations;
-using Pandora.Application.Utilities.Results.Interfaces;
-using Pandora.Application.Utilities.Results;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Authentication;
 using System.Security.Claims;
@@ -14,8 +10,11 @@ using System.Text.RegularExpressions;
 using Pandora.Core.Domain.Entities;
 using Pandora.Application.Interfaces.Repositories;
 using Pandora.Shared.DTOs.UserDTOs;
+using Pandora.Application.Interfaces.Security;
+using Pandora.Application.Interfaces.Results;
+using Pandora.Infrastructure.Utilities.Results.Implementations;
 
-namespace Pandora.Application.Services;
+namespace Pandora.Infrastructure.Services;
 
 public class AuthService : IAuthService
 {

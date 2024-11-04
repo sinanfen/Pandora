@@ -1,5 +1,5 @@
 ﻿
-namespace Pandora.Application.Utilities.Results.Interfaces;
+namespace Pandora.Application.Interfaces.Results;
 
 public interface IResult
 {

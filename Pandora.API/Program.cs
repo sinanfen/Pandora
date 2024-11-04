@@ -9,9 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Pandora.Application.Interfaces;
-using Pandora.Application.Services;
 using Microsoft.OpenApi.Models;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +45,6 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddInfrastructureServices();
 builder.Services.AddApplicationServices();

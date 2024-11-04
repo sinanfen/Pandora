@@ -1,6 +1,6 @@
 ﻿using System.Security.Authentication;
 
-namespace Pandora.Application.Security.Interfaces;
+namespace Pandora.Application.Interfaces.Security;
 
 public interface IHasher
 {

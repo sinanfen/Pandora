@@ -1,6 +1,6 @@
 ﻿using Pandora.Application.Interfaces;
 
-namespace Pandora.Application.Services;
+namespace Pandora.Infrastructure.Services;
 
 public class RoleService : IRoleService
 {

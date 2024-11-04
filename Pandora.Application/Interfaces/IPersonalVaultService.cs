@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Query;
-using Pandora.Application.Utilities.Results.Interfaces;
+using Pandora.Application.Interfaces.Results;
 using Pandora.Core.Domain.Entities;
 using Pandora.Core.Persistence.Paging;
 using Pandora.Shared.DTOs.PersonalVaultDTOs;

@@ -2,10 +2,6 @@
 using Microsoft.EntityFrameworkCore.Query;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Repositories;
-using Pandora.Application.Security.Interfaces;
-using Pandora.Application.Utilities.Results.Implementations;
-using Pandora.Application.Utilities.Results;
-using Pandora.Application.Utilities.Results.Interfaces;
 using Pandora.Core.Domain.Entities;
 using Pandora.Core.Persistence.Paging;
 using System.Linq.Expressions;
@@ -14,8 +10,11 @@ using Pandora.Application.Validators.PersonalVaultValidators;
 using Microsoft.Extensions.Logging;
 using Pandora.Shared.DTOs.PersonalVaultDTOs;
 using Microsoft.EntityFrameworkCore;
+using Pandora.Application.Interfaces.Security;
+using Pandora.Application.Interfaces.Results;
+using Pandora.Infrastructure.Utilities.Results.Implementations;
 
-namespace Pandora.Application.Services;
+namespace Pandora.Infrastructure.Services;
 
 public class PersonalVaultService : IPersonalVaultService
 {

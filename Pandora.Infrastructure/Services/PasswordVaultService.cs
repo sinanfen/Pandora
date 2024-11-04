@@ -2,10 +2,6 @@
 using Microsoft.EntityFrameworkCore.Query;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Repositories;
-using Pandora.Application.Security.Interfaces;
-using Pandora.Application.Utilities.Results.Implementations;
-using Pandora.Application.Utilities.Results;
-using Pandora.Application.Utilities.Results.Interfaces;
 using Pandora.Application.Validators.PasswordVaultValidators;
 using Pandora.Core.Domain.Entities;
 using Pandora.Core.Persistence.Paging;
@@ -13,8 +9,11 @@ using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using Pandora.CrossCuttingConcerns.ExceptionHandling;
 using Pandora.Shared.DTOs.PasswordVaultDTOs;
+using Pandora.Application.Interfaces.Security;
+using Pandora.Application.Interfaces.Results;
+using Pandora.Infrastructure.Utilities.Results.Implementations;
 
-namespace Pandora.Application.Services;
+namespace Pandora.Infrastructure.Services;
 
 public class PasswordVaultService : IPasswordVaultService
 {

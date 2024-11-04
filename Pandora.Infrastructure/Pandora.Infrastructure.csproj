@@ -29,4 +29,9 @@
     <ProjectReference Include="..\Pandora.Core\Pandora.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Security\Enums\" />
+    <Folder Include="Security\Interfaces\" />
+  </ItemGroup>
+
 </Project>

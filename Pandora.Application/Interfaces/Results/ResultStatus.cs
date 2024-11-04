@@ -1,5 +1,4 @@
-﻿
-namespace Pandora.Application.Utilities.Results;
+﻿namespace Pandora.Application.Interfaces.Results;
 
 public enum ResultStatus
 {

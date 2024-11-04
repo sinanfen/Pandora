@@ -1,6 +1,6 @@
-﻿using Pandora.Application.Utilities.Results.Interfaces;
+﻿using Pandora.Application.Interfaces.Results;
 
-namespace Pandora.Application.Utilities.Results.Implementations;
+namespace Pandora.Infrastructure.Utilities.Results.Implementations;
 
 public class DataResult<T> : IDataResult<T>
 {

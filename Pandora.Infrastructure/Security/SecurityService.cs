@@ -1,4 +1,4 @@
-﻿using Pandora.Application.Security.Interfaces;
+﻿using Pandora.Application.Interfaces.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;

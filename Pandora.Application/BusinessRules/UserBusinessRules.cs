@@ -1,5 +1,5 @@
 ﻿using Pandora.Application.Interfaces.Repositories;
-using Pandora.Application.Security.Interfaces;
+using Pandora.Application.Interfaces.Security;
 using Pandora.CrossCuttingConcerns.ExceptionHandling;
 using System.Security.Authentication;
 
