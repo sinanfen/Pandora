@@ -1,8 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["Pandora.API/Pandora.API.csproj", "Pandora.API/"]
-RUN dotnet restore "./Pandora.API/Pandora.API.csproj"
+COPY ["Pandora.Application/Pandora.Application.csproj", "Pandora.Application/"]
+COPY ["Pandora.Core/Pandora.Core.csproj", "Pandora.Core/"]
+COPY ["Pandora.CrossCuttingConcerns/Pandora.CrossCuttingConcerns.csproj", "Pandora.CrossCuttingConcerns/"]
+COPY ["Pandora.Infrastructure/Pandora.Infrastructure.csproj", "Pandora.Infrastructure/"]
+
+RUN dotnet restore "Pandora.API/Pandora.API.csproj"
 COPY . .
+
 WORKDIR "/src/Pandora.API"
 RUN dotnet build -c Release -o /app/build
 
