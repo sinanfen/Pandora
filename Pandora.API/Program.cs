@@ -89,12 +89,18 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin", policy =>
-        policy.WithOrigins("https://localhost:7192") //4200 Angular
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()); // Required if you're using authentication cookies or tokens
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+        policy.WithOrigins(
+            "http://localhost:7192",   // Blazor WASM
+            "https://localhost:7192",
+            "http://localhost:5174"   , // React Vite App
+            "https://localhost:5174"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()); // Eðer authentication cookies veya tokens kullanýyorsanýz
 });
+
 
 // Later in the pipeline
 
@@ -129,7 +135,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowSpecificOrigin"); // Use the correct CORS policy here
+app.UseCors("AllowSpecificOrigins"); // Use the correct CORS policy here
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Pandora.Shared</PackageId>
+    <Version>1.0.3</Version>
+    <Authors>Sinan Fen</Authors>
+    <Company>Sinan Fen</Company>
+    <Description>A shared library containing Data Transfer Objects (DTOs) for seamless integration between Blazor and API projects in the Pandora solution.</Description>
+    <PackageTags>blazor, API, DTOs</PackageTags>
+    <RepositoryUrl>https://github.com/sinanfen/Pandora.Shared</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Enums\**" />
+    <EmbeddedResource Remove="Enums\**" />
+    <None Remove="Enums\**" />
+  </ItemGroup>
+
+</Project>

@@ -29,6 +29,10 @@ public class PersonalVault : Entity<Guid>
     // Optional expiration date for entries, e.g., auto-delete after a certain period
     public DateTime? ExpirationDate { get; set; }
 
+    public bool IsLocked { get; set; }
+
+    public DateTime? UnlockDate { get; set; }
+
     // Optional category for organization
     public Guid? CategoryId { get; set; }
     public Category Category { get; set; }

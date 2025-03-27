@@ -38,6 +38,9 @@ public class PersonalVaultConfiguration : BaseEntityConfiguration<PersonalVault,
 
         builder.Property(pb => pb.ExpirationDate)
                .IsRequired(false); // Expiration date is optional
+                                   //
+        builder.Property(pb => pb.UnlockDate)
+               .IsRequired(false); // Unlock date is optional
 
         // Relationships
         builder.HasOne(pb => pb.User)
@@ -59,8 +62,8 @@ public class PersonalVaultConfiguration : BaseEntityConfiguration<PersonalVault,
         .HasColumnName("CreatedDate")
         .HasDefaultValueSql("CURRENT_TIMESTAMP")
         .IsRequired();
-            builder.Property(b => b.UpdatedDate).HasColumnName("UpdatedDate");
-            builder.Property(b => b.DeletedDate).HasColumnName("DeletedDate");
+        builder.Property(b => b.UpdatedDate).HasColumnName("UpdatedDate");
+        builder.Property(b => b.DeletedDate).HasColumnName("DeletedDate");
 
         builder.HasQueryFilter(b => !b.DeletedDate.HasValue);
     }

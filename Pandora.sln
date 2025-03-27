@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.Application", "Pand
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.CrossCuttingConcerns", "Pandora.CrossCuttingConcerns\Pandora.CrossCuttingConcerns.csproj", "{C874A04D-26D6-4305-839B-0FF37956D41A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pandora.Shared", "Pandora.Shared\Pandora.Shared.csproj", "{6A519BF5-B10B-AF91-A646-03D436F5F5A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{C874A04D-26D6-4305-839B-0FF37956D41A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C874A04D-26D6-4305-839B-0FF37956D41A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C874A04D-26D6-4305-839B-0FF37956D41A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A519BF5-B10B-AF91-A646-03D436F5F5A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A519BF5-B10B-AF91-A646-03D436F5F5A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A519BF5-B10B-AF91-A646-03D436F5F5A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A519BF5-B10B-AF91-A646-03D436F5F5A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +57,7 @@ Global
 		{A419CAFE-8285-4F92-90CE-254E6B4D0933} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
 		{7929418A-A481-4E5D-9F54-DCDFD870F0DC} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
 		{C874A04D-26D6-4305-839B-0FF37956D41A} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
+		{6A519BF5-B10B-AF91-A646-03D436F5F5A9} = {F7E09A01-0AC4-4D7B-928E-82A323ABC105}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AB61A51B-C04F-4D6E-91FD-A37760A7D9FA}
