@@ -98,10 +98,10 @@ public class CategoryService : ICategoryService
             Category? category = await _categoryRepository.GetAsync(x => x.Id == categoryId, cancellationToken: cancellationToken);
             if (category == null)
             {
-                return new Result(ResultStatus.Warning, "Kullanıcı bulunamadı.");
+                return new Result(ResultStatus.Warning, "Kategori bulunamadı.");
             }
             await _categoryRepository.DeleteAsync(category, cancellationToken: cancellationToken);
-            return new Result(ResultStatus.Success, "Kullanıcı başarıyla silindi.");
+            return new Result(ResultStatus.Success, "Kategori başarıyla silindi.");
         }
         catch (Exception ex)
         {
