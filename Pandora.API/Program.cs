@@ -141,4 +141,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+
+if (app.Environment.IsProduction())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<PandoraDbContext>();
+    dbContext.Database.Migrate();
+}
+
 app.Run();
