@@ -11,5 +11,6 @@ public class PersonalVaultProfile : Profile
         CreateMap<PersonalVaultAddDto, PersonalVault>();
         CreateMap<PersonalVaultDto, PersonalVault>();
         CreateMap<PersonalVault, PersonalVaultDto>().ReverseMap();
+        CreateMap<PersonalVaultUpdateDto, PersonalVault>();
     }
 }

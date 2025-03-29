@@ -26,7 +26,7 @@ public class AuthController : ControllerBase
         var result = await _authService.LoginAsync(dto, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return Ok(new { Success = false, Message = result.Message });
-        return Ok(new { Success = true, Token = result.Data, Message = result.Message });
+        return BadRequest(new { Success = true, Token = result.Data, Message = result.Message });
     }
 
     [HttpPost("register")]
@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
         var result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return Ok(new { Success = false, Message = result.Message });
-        return Ok(new { Success = true, Data = result.Data, Message = result.Message });
+        return BadRequest(new { Success = true, Data = result.Data, Message = result.Message });
     }
 
     [Authorize]
@@ -45,7 +45,7 @@ public class AuthController : ControllerBase
         var result = await _userService.ChangePasswordAsync(userPasswordChangeDto, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(result); // Return structured JSON
-        return Ok(result); // Success message in structured JSON
+        return BadRequest(result); // Success message in structured JSON
     }
 
     // Token doğrulama
