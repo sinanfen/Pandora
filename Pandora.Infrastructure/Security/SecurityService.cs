@@ -8,17 +8,13 @@ namespace Pandora.Application.Security;
 public class SecurityService : IHasher, IEncryption
 {
     private readonly byte[] _key;
-    private readonly byte[] _iv;
+    private const int IV_SIZE = 16; // AES bloğu 128 bit (16 byte)
 
-    public SecurityService(string key, string iv)
+    public SecurityService(string key)
     {
         _key = Convert.FromBase64String(key);
-        _iv = Convert.FromBase64String(iv);
-
-        if (_key.Length != 32) // 256 bit = 32 byte
-            throw new ArgumentException("The key must be 32 bytes (256 bits) long.");
-        if (_iv.Length != 16) // 128 bit = 16 byte
-            throw new ArgumentException("The IV must be 16 bytes (128 bits) long.");
+        if (_key.Length != 32)
+            throw new ArgumentException("Key must be 256 bits (32 bytes).");
     }
 
     // IHasher Implementation
@@ -77,22 +73,20 @@ public class SecurityService : IHasher, IEncryption
         using (Aes aesAlg = Aes.Create())
         {
             aesAlg.Key = _key;
-            aesAlg.IV = _iv;
+            aesAlg.GenerateIV();
             aesAlg.Mode = CipherMode.CBC;
             aesAlg.Padding = PaddingMode.PKCS7;
 
-            ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
-
-            using (var msEncrypt = new MemoryStream())
+            using (var encryptor = aesAlg.CreateEncryptor())
+            using (var ms = new MemoryStream())
             {
-                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                ms.Write(aesAlg.IV, 0, IV_SIZE); // IV'i ön ek olarak ekle
+                using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                using (var sw = new StreamWriter(cs, Encoding.UTF8))
                 {
-                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                    {
-                        swEncrypt.Write(plainText);
-                    }
-                    return Convert.ToBase64String(msEncrypt.ToArray());
+                    sw.Write(plainText);
                 }
+                return Convert.ToBase64String(ms.ToArray());
             }
         }
     }
@@ -102,25 +96,45 @@ public class SecurityService : IHasher, IEncryption
         if (string.IsNullOrEmpty(cipherText))
             throw new ArgumentNullException(nameof(cipherText));
 
-        var fullCipher = Convert.FromBase64String(cipherText);
-
-        using (Aes aesAlg = Aes.Create())
+        byte[] cipherBytes;
+        try
         {
-            aesAlg.Key = _key;
-            aesAlg.IV = _iv;
-            aesAlg.Mode = CipherMode.CBC;
-            aesAlg.Padding = PaddingMode.PKCS7;
+            cipherBytes = Convert.FromBase64String(cipherText);
+        }
+        catch (FormatException)
+        {
+            throw new ArgumentException("Geçersiz Base64 formatı.", nameof(cipherText));
+        }
 
-            ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+        if (cipherBytes.Length < IV_SIZE)
+            throw new ArgumentException("Şifrelenmiş veri çok kısa.");
 
-            using (MemoryStream msDecrypt = new MemoryStream(fullCipher))
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = _key;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            // IV ve ciphertext'i ayır
+            byte[] iv = new byte[IV_SIZE];
+            Array.Copy(cipherBytes, 0, iv, 0, IV_SIZE);
+            aes.IV = iv;
+
+            byte[] encryptedData = new byte[cipherBytes.Length - IV_SIZE];
+            Array.Copy(cipherBytes, IV_SIZE, encryptedData, 0, encryptedData.Length);
+
+            using (var decryptor = aes.CreateDecryptor())
+            using (var ms = new MemoryStream(encryptedData))
+            using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+            using (var sr = new StreamReader(cs, Encoding.UTF8))
             {
-                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                try
                 {
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                    {
-                        return srDecrypt.ReadToEnd();
-                    }
+                    return sr.ReadToEnd();
+                }
+                catch (CryptographicException ex)
+                {
+                    throw new CryptographicException("Şifre çözme başarısız. Anahtar veya veri bozuk.", ex);
                 }
             }
         }

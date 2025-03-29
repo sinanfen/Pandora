@@ -21,9 +21,9 @@ public static class InfrastructureServicesExtension
         services.AddScoped<IPersonalVaultService, PersonalVaultService>();
 
         // AESService için Key ve IV kontrolü
-        var (aesKey, aesIV) = AESEnvironmentHelper.GetOrCreateAesKeys();
-        services.AddSingleton<IHasher>(new SecurityService(aesKey, aesIV));
-        services.AddSingleton<IEncryption>(new SecurityService(aesKey, aesIV));
+        var aesKey = AESEnvironmentHelper.GetOrCreateAesKey();
+        services.AddSingleton<IHasher>(new SecurityService(aesKey));
+        services.AddSingleton<IEncryption>(new SecurityService(aesKey));
 
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
