@@ -12,6 +12,7 @@ using Pandora.Shared.DTOs.PasswordVaultDTOs;
 using Pandora.Application.Interfaces.Security;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Infrastructure.Utilities.Results.Implementations;
+using System.Security.Cryptography;
 
 namespace Pandora.Infrastructure.Services;
 
@@ -177,14 +178,40 @@ public class PasswordVaultService : IPasswordVaultService
         }
     }
 
-    public async Task<PasswordVaultDto> GetByIdAndUserAsync(Guid passwordVaultId, Guid userId, CancellationToken cancellationToken)
+    public async Task<IDataResult<PasswordVaultDto>> GetByIdAndUserAsync(Guid passwordVaultId, Guid userId, CancellationToken cancellationToken)
     {
-        var passwordVault = await _passwordVaultRepository.GetAsync(x => x.Id == passwordVaultId && x.UserId == userId, cancellationToken: cancellationToken);
-        if (passwordVault == null)
-            throw new BusinessException("Password vault not found.");
+        try
+        {
+            var passwordVault = await _passwordVaultRepository.GetAsync(
+                x => x.Id == passwordVaultId && x.UserId == userId,
+                cancellationToken: cancellationToken);
 
-        DecryptFields(passwordVault);
-        return _mapper.Map<PasswordVaultDto>(passwordVault);
+            if (passwordVault == null)
+                return new DataResult<PasswordVaultDto>(ResultStatus.Warning, "Password vault not found.", null);
+
+            try
+            {
+                DecryptFields(passwordVault);
+                var dto = _mapper.Map<PasswordVaultDto>(passwordVault);
+                return new DataResult<PasswordVaultDto>(ResultStatus.Success, "Password vault retrieved successfully.", dto);
+            }
+            catch (CryptographicException ex)
+            {
+                _logger.LogError(ex, "Failed to decrypt password vault data for ID: {Id}", passwordVaultId);
+                return new DataResult<PasswordVaultDto>(ResultStatus.Error, "Could not decrypt password vault data. The encryption key may have changed.", null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing password vault with ID: {Id}", passwordVaultId);
+                return new DataResult<PasswordVaultDto>(ResultStatus.Error, "An error occurred while processing the password vault.", null);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get password vault by Id. Details: {ExceptionMessage}",
+                nameof(GetByIdAndUserAsync), ex.Message);
+            return new DataResult<PasswordVaultDto>(ResultStatus.Error, "An error occurred while fetching the password vault.", null);
+        }
     }
 
     public async Task<PasswordVaultDto> GetByIdAsync(Guid passwordVaultId, CancellationToken cancellationToken)

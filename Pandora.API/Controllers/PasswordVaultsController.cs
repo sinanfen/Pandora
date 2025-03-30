@@ -32,14 +32,16 @@ public class PasswordVaultsController : ControllerBase
     [HttpGet("{passwordVaultId}")]
     public async Task<IActionResult> GetByIdAsync(Guid passwordVaultId, CancellationToken cancellationToken)
     {
-        // Kullanıcının kimliğini al
         var userId = GetLoggedInUserId();
+        var result = await _passwordVaultService.GetByIdAndUserAsync(passwordVaultId, userId, cancellationToken);
 
-        var passwordVault = await _passwordVaultService.GetByIdAndUserAsync(passwordVaultId, userId, cancellationToken);
-        if (passwordVault == null)
-            return NotFound("Kişisel kasa bulunamadı.");
-
-        return Ok(passwordVault);
+        return result.ResultStatus switch
+        {
+            ResultStatus.Success => Ok(result.Data),
+            ResultStatus.Warning => NoContent(),
+            ResultStatus.Error => StatusCode(500, result.Message),
+            _ => BadRequest(result.Message)
+        };
     }
 
     // GET: api/PasswordVaults/getall
