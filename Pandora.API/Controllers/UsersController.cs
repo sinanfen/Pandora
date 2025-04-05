@@ -3,6 +3,7 @@ using Pandora.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Shared.DTOs.UserDTOs;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Pandora.API.Controllers;
 
@@ -18,8 +19,13 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    // GET: api/User/CreateDefaultUser
+    /// <summary>
+    /// Creates a default admin user (for development/testing purposes).
+    /// </summary>
     [HttpPost("default")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Create a default user", Description = "Creates a predefined default user. Typically used in development or testing.")]
+    [SwaggerResponse(200, "Default user created successfully")]
     public async Task<IActionResult> CreateDefaultUser(CancellationToken cancellationToken)
     {
         UserRegisterDto? userRegisterDto = new UserRegisterDto()
@@ -37,15 +43,26 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Retrieves all users (Admin only).
+    /// </summary>
     [Authorize("Admin")]
     [HttpGet]
+    [SwaggerOperation(Summary = "Get all users", Description = "Returns a list of all users. Only accessible by Admin role.")]
+    [SwaggerResponse(200, "Users retrieved successfully")]
     public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
         var data = await _userService.GetAllAsync(cancellationToken);
         return Ok(data);
     }
 
+    /// <summary>
+    /// Retrieves a user by ID.
+    /// </summary>
     [HttpGet("{userId}")]
+    [SwaggerOperation(Summary = "Get user by ID", Description = "Fetches a user's details using their unique ID.")]
+    [SwaggerResponse(200, "User found")]
+    [SwaggerResponse(404, "User not found")]
     public async Task<IActionResult> GetAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await _userService.GetByIdAsync(userId, cancellationToken);
@@ -54,8 +71,14 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    // PUT: api/{userId}
+    /// <summary>
+    /// Updates a user's profile information.
+    /// </summary>
     [HttpPut("{userId}")]
+    [SwaggerOperation(Summary = "Update user", Description = "Updates the user profile data based on user ID.")]
+    [SwaggerResponse(200, "User updated successfully")]
+    [SwaggerResponse(400, "Bad request - invalid model or ID mismatch")]
+    [SwaggerResponse(404, "User not found")]
     public async Task<IActionResult> UpdateAsync(Guid userId, [FromBody] UserUpdateDto userUpdateDto, CancellationToken cancellationToken)
     {
         if (userId != userUpdateDto.Id)
@@ -71,9 +94,14 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    // DELETE: api/users/delete/{userId}
+    /// <summary>
+    /// Deletes a user by ID (Admin only).
+    /// </summary>
     [Authorize("Admin")]
     [HttpDelete("{userId}")]
+    [SwaggerOperation(Summary = "Delete user", Description = "Deletes a user by ID. Only accessible by Admins.")]
+    [SwaggerResponse(200, "User deleted successfully")]
+    [SwaggerResponse(404, "User not found")]
     public async Task<IActionResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await _userService.DeleteAsync(userId, cancellationToken);

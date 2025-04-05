@@ -8,7 +8,6 @@ using Serilog.Events;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Pandora.Application.Interfaces;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,9 +41,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("User", policy => policy.RequireRole("User"));
 });
 
-
 builder.Services.AddControllers();
-
 
 builder.Services.AddInfrastructureServices();
 builder.Services.AddApplicationServices();
@@ -54,11 +51,18 @@ builder.Services.AddApplicationServices();
 builder.Services.AddDbContext<PandoraDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PandoraBoxDatabase")));
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Pandora.API", Version = "v1" });
+    c.SwaggerDoc("v1",
+        new OpenApiInfo
+        {
+            Title = "Pandora.API",
+            Version = "v1",
+            Description = "Pandora API"
+        });
+
+    c.EnableAnnotations(); //Swagger açýklama desteði
 
     // JWT Bearer token için Swagger ayarlarý
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -85,22 +89,17 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
+
 });
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins", policy =>
-        policy.WithOrigins(
-            "http://localhost:7192",   // Blazor WASM
-            "https://localhost:7192",
-            "http://localhost:5174"   , // React Vite App
-            "https://localhost:5174"
-        )
+        policy
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials()); // Eðer authentication cookies veya tokens kullanýyorsanýz
 });
-
 
 // Later in the pipeline
 
@@ -128,11 +127,16 @@ builder.Host.UseSerilog();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(c =>
+    {
+        c.RouteTemplate = "swagger/{documentName}/swagger.json";
+    });
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pandora.API v1");
+    });
 }
 
 app.UseCors("AllowSpecificOrigins"); // Use the correct CORS policy here
@@ -140,7 +144,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 
 if (app.Environment.IsProduction())
 {

@@ -167,7 +167,6 @@ public class PasswordVaultService : IPasswordVaultService
             var passwordVault = await _passwordVaultRepository.GetAsync(predicate, include, withDeleted, enableTracking, cancellationToken);
             if (passwordVault == null)
                 return null;
-
             DecryptFields(passwordVault);
             return _mapper.Map<PasswordVaultDto>(passwordVault);
         }
@@ -185,10 +184,8 @@ public class PasswordVaultService : IPasswordVaultService
             var passwordVault = await _passwordVaultRepository.GetAsync(
                 x => x.Id == passwordVaultId && x.UserId == userId,
                 cancellationToken: cancellationToken);
-
             if (passwordVault == null)
                 return new DataResult<PasswordVaultDto>(ResultStatus.Warning, "Password vault not found.", null);
-
             try
             {
                 DecryptFields(passwordVault);
@@ -219,7 +216,6 @@ public class PasswordVaultService : IPasswordVaultService
         var passwordVault = await _passwordVaultRepository.GetAsync(x => x.Id == passwordVaultId, cancellationToken: cancellationToken);
         if (passwordVault == null)
             throw new BusinessException("Password vault not found.");
-
         DecryptFields(passwordVault);
         return _mapper.Map<PasswordVaultDto>(passwordVault);
     }

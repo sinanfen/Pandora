@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Pandora.Application.Interfaces.Security;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Infrastructure.Utilities.Results.Implementations;
+using System.Security.Cryptography;
 
 namespace Pandora.Infrastructure.Services;
 
@@ -171,12 +172,9 @@ public class PersonalVaultService : IPersonalVaultService
         try
         {
             var personalVault = await _personalVaultRepository.GetAsync(predicate, include, withDeleted, enableTracking, cancellationToken);
-
             if (personalVault == null)
                 return null;
-
             DecryptFields(personalVault);
-
             return _mapper.Map<PersonalVaultDto>(personalVault);
         }
         catch (Exception ex)
@@ -193,9 +191,7 @@ public class PersonalVaultService : IPersonalVaultService
             var personalVault = await _personalVaultRepository.GetAsync(x => x.Id == personalVaultId, cancellationToken: cancellationToken);
             if (personalVault == null)
                 throw new BusinessException("Personal vault not found.");
-
             DecryptFields(personalVault);
-
             var resultDto = _mapper.Map<PersonalVaultDto>(personalVault);
             return resultDto;
         }
@@ -206,23 +202,37 @@ public class PersonalVaultService : IPersonalVaultService
         }
     }
 
-    public async Task<PersonalVaultDto> GetByIdAndUserAsync(Guid personalVaultId, Guid userId, CancellationToken cancellationToken)
+    public async Task<IDataResult<PersonalVaultDto>> GetByIdAndUserAsync(Guid personalVaultId, Guid userId, CancellationToken cancellationToken)
     {
         try
         {
-            var personalVault = await _personalVaultRepository.GetAsync(x => x.Id == personalVaultId && x.UserId == userId, cancellationToken: cancellationToken);
+            var personalVault = await _personalVaultRepository.GetAsync(
+                x => x.Id == personalVaultId && x.UserId == userId,
+                cancellationToken: cancellationToken);
             if (personalVault == null)
-                throw new BusinessException("Personal vault not found.");
-
-            DecryptFields(personalVault);
-
-            var resultDto = _mapper.Map<PersonalVaultDto>(personalVault);
-            return resultDto;
+                return new DataResult<PersonalVaultDto>(ResultStatus.Warning, "Personal vault not found.", null);
+            try
+            {
+                DecryptFields(personalVault);
+                var dto = _mapper.Map<PersonalVaultDto>(personalVault);
+                return new DataResult<PersonalVaultDto>(ResultStatus.Success, "Personal vault retrieved successfully.", dto);
+            }
+            catch (CryptographicException ex)
+            {
+                _logger.LogError(ex, "Failed to decrypt personal vault data for ID: {Id}", personalVaultId);
+                return new DataResult<PersonalVaultDto>(ResultStatus.Error, "Could not decrypt personal vault data. The encryption key may have changed.", null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing personal vault with ID: {Id}", personalVaultId);
+                return new DataResult<PersonalVaultDto>(ResultStatus.Error, "An error occurred while processing the personal vault.", null);
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {MethodName}. Failed to get personal vault by Id. Details: {ExceptionMessage}", nameof(GetByIdAsync), ex.Message);
-            throw new BusinessException("An error occurred while fetching the personal vault.");
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get personal vault by Id. Details: {ExceptionMessage}",
+                nameof(GetByIdAndUserAsync), ex.Message);
+            return new DataResult<PersonalVaultDto>(ResultStatus.Error, "An error occurred while fetching the personal vault.", null);
         }
     }
 
