@@ -25,8 +25,8 @@ public class AuthController : ControllerBase
     {
         var result = await _authService.LoginAsync(dto, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
-            return Ok(new { Success = false, Message = result.Message });
-        return BadRequest(new { Success = true, Token = result.Data, Message = result.Message });
+            return BadRequest(new { Success = false, Message = result.Message });
+        return Ok(new { Success = true, Token = result.Data, Message = result.Message });
     }
 
     [HttpPost("register")]
