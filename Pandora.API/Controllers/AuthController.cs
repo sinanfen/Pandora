@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
     [SwaggerResponse(400, "Invalid information")]
     public async Task<IActionResult> RegisterAsync(UserRegisterDto userRegisterDto, CancellationToken cancellationToken)
     {
-        var result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
+        IDataResult<UserDto> result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Success = false, Message = result.Message });
         return Ok(new { Success = true, Data = result.Data, Message = result.Message });

@@ -96,9 +96,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins", policy =>
         policy
+        .WithOrigins("http://localhost:4200") // Angular client URL
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials()); // Eðer authentication cookies veya tokens kullanýyorsanýz
+        .AllowCredentials()); 
 });
 
 // Later in the pipeline
@@ -139,7 +140,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseSerilogRequestLogging();
+
 app.UseCors("AllowSpecificOrigins"); // Use the correct CORS policy here
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

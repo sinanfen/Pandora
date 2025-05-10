@@ -17,7 +17,11 @@ public class UserRegisterDtoValidator : AbstractValidator<UserRegisterDto>
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Parola boş olamaz.")
-            .MinimumLength(6).WithMessage("Parola en az 6 karakter olmalıdır.");
+            .MinimumLength(8).WithMessage("Parola en az 8 karakter olmalıdır.")
+            .Matches(@"[A-Z]").WithMessage("Parola en az bir büyük harf içermelidir.")
+            .Matches(@"[a-z]").WithMessage("Parola en az bir küçük harf içermelidir.")
+            .Matches(@"\d").WithMessage("Parola en az bir rakam içermelidir.")
+            .Matches(@"[\W_]").WithMessage("Parola en az bir özel karakter içermelidir.");
 
         RuleFor(x => x.ConfirmPassword)
             .Equal(x => x.Password).WithMessage("Parolalar eşleşmiyor.");

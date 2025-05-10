@@ -10,15 +10,14 @@ public class UserPasswordChangeDtoValidator : AbstractValidator<UserPasswordChan
         // CurrentPassword validation
         RuleFor(x => x.CurrentPassword)
             .NotEmpty().WithMessage("Mevcut şifre boş olamaz.");
-
-        // NewPassword validation (password complexity)
+   
         RuleFor(x => x.NewPassword)
-            .NotEmpty().WithMessage("Yeni şifre boş olamaz.")
-            .MinimumLength(8).WithMessage("Yeni şifre en az 8 karakter olmalıdır.")
-            .Matches("[A-Z]").WithMessage("Yeni şifre en az bir büyük harf içermelidir.")
-            .Matches("[a-z]").WithMessage("Yeni şifre en az bir küçük harf içermelidir.")
-            .Matches("[0-9]").WithMessage("Yeni şifre en az bir rakam içermelidir.")
-            .Matches("[^a-zA-Z0-9]").WithMessage("Yeni şifre en az bir özel karakter içermelidir.");
+            .NotEmpty().WithMessage("Parola boş olamaz.")
+            .MinimumLength(8).WithMessage("Parola en az 8 karakter olmalıdır.")
+            .Matches(@"[A-Z]").WithMessage("Parola en az bir büyük harf içermelidir.")
+            .Matches(@"[a-z]").WithMessage("Parola en az bir küçük harf içermelidir.")
+            .Matches(@"\d").WithMessage("Parola en az bir rakam içermelidir.")
+            .Matches(@"[\W_]").WithMessage("Parola en az bir özel karakter içermelidir.");
 
         // PasswordRepeat validation (password confirmation)
         RuleFor(x => x.ConfirmNewPassword)
