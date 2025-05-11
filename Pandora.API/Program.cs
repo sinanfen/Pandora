@@ -92,14 +92,23 @@ builder.Services.AddSwaggerGen(c =>
 
 });
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowSpecificOrigins", policy =>
+//        policy
+//        .WithOrigins("http://localhost:4200") // Angular client URL
+//        .AllowAnyHeader()
+//        .AllowAnyMethod()
+//        .AllowCredentials()); 
+//});
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigins", policy =>
+    options.AddPolicy("AllowAll", policy =>
         policy
-        .WithOrigins("http://localhost:4200") // Angular client URL
+        .AllowAnyOrigin()
         .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials()); 
+        .AllowAnyMethod());
 });
 
 // Later in the pipeline
@@ -142,7 +151,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseSerilogRequestLogging();
 
-app.UseCors("AllowSpecificOrigins"); // Use the correct CORS policy here
+//app.UseCors("AllowSpecificOrigins"); // Use the correct CORS policy here
+
+app.UseCors("AllowAll"); // Use the correct CORS policy here
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
