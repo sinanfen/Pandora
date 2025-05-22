@@ -7,6 +7,9 @@ public class CategoryUpdateDtoValidator : AbstractValidator<CategoryUpdateDto>
 {
     public CategoryUpdateDtoValidator()
     {
+        RuleFor(x => x.Id).NotEmpty().WithMessage("ID boş olamaz.")
+            .NotNull().WithMessage("ID geçersiz.");
+
         RuleFor(x => x.UserId)
         .NotEmpty().WithMessage("Kullanıcı kimliği boş olamaz.");
 

@@ -7,6 +7,9 @@ namespace Pandora.Application.Validators.PasswordVaultValidators
     {
         public PasswordVaultUpdateDtoValidator()
         {
+            RuleFor(x => x.Id).NotEmpty().WithMessage("ID boş olamaz.")
+            .NotNull().WithMessage("ID geçersiz.");
+
             // SiteName field validation
             RuleFor(x => x.SiteName)
                 .NotEmpty().WithMessage("Site adı boş olamaz.")

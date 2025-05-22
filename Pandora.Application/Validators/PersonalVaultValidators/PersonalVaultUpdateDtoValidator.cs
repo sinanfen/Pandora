@@ -7,6 +7,10 @@ public class PersonalVaultUpdateDtoValidator : AbstractValidator<PersonalVaultUp
 {
     public PersonalVaultUpdateDtoValidator()
     {
+
+        RuleFor(x=>x.Id).NotEmpty().WithMessage("ID boş olamaz.")
+            .NotNull().WithMessage("ID geçersiz.");
+
         // Title field validation
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Başlık boş olamaz.")
@@ -21,11 +25,6 @@ public class PersonalVaultUpdateDtoValidator : AbstractValidator<PersonalVaultUp
         RuleFor(x => x.Url)
             .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("Geçerli bir URL giriniz.")
             .When(x => !string.IsNullOrEmpty(x.Url));
-
-        // MediaFile field validation
-        RuleFor(x => x.MediaFile)
-            .MaximumLength(255).WithMessage("Medya dosyası yolu en fazla 255 karakter olabilir.")
-            .When(x => !string.IsNullOrEmpty(x.MediaFile));
 
         // Tags field validation
         RuleFor(x => x.Tags)

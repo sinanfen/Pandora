@@ -11,7 +11,7 @@ public class PersonalVaultDto : BaseDto<Guid>
     public string SecureContent { get; set; }  // AES-encrypted content (e.g., notes, links)
     public string SecureSummary { get; set; }  // Optional preview of the content
     public string SecureUrl { get; set; }  // AES-encrypted URL, if available
-    public string SecureMediaFile { get; set; }  // AES-encrypted media file path, if any
+    public string? SecureMediaFile { get; set; }  // AES-encrypted media file path, if any
     public bool IsLocked { get; set; } // Varsayılan değer false
     public DateTime? UnlockDate { get; set; } // Kilit açılma tarihi (en az 1 ay sonrası)
     // Metadata

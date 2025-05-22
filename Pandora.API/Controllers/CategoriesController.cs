@@ -72,7 +72,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> AddAsync([FromBody] CategoryAddDto categoryAddDto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return ValidationProblem(ModelState);
         var result = await _categoryService.AddAsync(categoryAddDto, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
@@ -90,7 +90,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> UpdateAsync([FromBody] CategoryUpdateDto categoryUpdateDto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return ValidationProblem(ModelState);
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
         var categoryDto = await _categoryService.GetByIdAsync(categoryUpdateDto.Id, cancellationToken);
         if (categoryDto == null || categoryDto.UserId != userId)

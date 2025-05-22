@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Shared.DTOs.UserDTOs;
@@ -27,6 +28,7 @@ public class AuthController : ControllerBase
     /// <returns>Response containing JWT token</returns>
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting("LoginPolicy")]
     [SwaggerOperation(Summary = "Performs user login", Description = "Logs in with email and password. Returns a JWT token.")]
     [SwaggerResponse(200, "Login successful")]
     [SwaggerResponse(400, "Invalid login")]

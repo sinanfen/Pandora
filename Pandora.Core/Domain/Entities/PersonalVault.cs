@@ -15,7 +15,7 @@ public class PersonalVault : Entity<Guid>
     // Optional URL field for storing related links (AES-encrypted)
     public string SecureUrl { get; set; }
     // Encrypted field to store any media file references (optional)
-    public string SecureMediaFile { get; set; }  // Path to media file (AES-encrypted)
+    public string? SecureMediaFile { get; set; } = string.Empty;  // Path to media file (AES-encrypted)
     // Optional tags for better organization and searching
     public IList<string> SecureTags { get; set; }
 

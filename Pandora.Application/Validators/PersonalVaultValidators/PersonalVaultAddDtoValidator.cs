@@ -22,10 +22,6 @@ public class PersonalVaultAddDtoValidator : AbstractValidator<PersonalVaultAddDt
             .NotEmpty().WithMessage("URL boş olamaz.")
             .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("Geçerli bir URL giriniz.");
 
-        // MediaFile field validation (if provided, it should meet the length requirement)
-        RuleFor(x => x.MediaFile)
-            .MaximumLength(255).WithMessage("Medya dosyası yolu en fazla 255 karakter olabilir.");
-
         // Tags field validation
         RuleFor(x => x.Tags)
             .Must(tags => tags != null && tags.Any()).WithMessage("En az bir etiket eklemelisiniz.")

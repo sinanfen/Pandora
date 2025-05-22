@@ -5,6 +5,9 @@ public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>
 {
     public UserUpdateDtoValidator()
     {
+        RuleFor(x => x.Id).NotEmpty().WithMessage("ID boş olamaz.")
+            .NotNull().WithMessage("ID geçersiz.");
+
         // Username Validation
         RuleFor(x => x.Username)
             .NotEmpty().WithMessage("Kullanıcı adı boş olamaz.")

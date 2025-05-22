@@ -28,6 +28,8 @@ public class PersonalVaultConfiguration : BaseEntityConfiguration<PersonalVault,
                .HasMaxLength(512); // Optional, limit URL length
 
         builder.Property(pb => pb.SecureMediaFile)
+               .IsRequired(false)
+               .HasDefaultValue(string.Empty) // Default to empty string if not provided
                .HasMaxLength(512); // Optional, limit media file path length
 
         builder.Property(pb => pb.IsFavorite)

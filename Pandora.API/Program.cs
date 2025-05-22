@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
+using System.Net;
+using Pandora.API.Middlewares;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,6 +115,17 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod());
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter(policyName: "LoginPolicy", options =>
+    {
+        options.PermitLimit = 5;
+        options.Window = TimeSpan.FromMinutes(1);
+        options.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 0;
+    });
+});
+
 // Later in the pipeline
 
 // Serilog configuration
@@ -137,25 +152,76 @@ builder.Host.UseSerilog();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Assembly ve Uygulama Bilgileri Loglama
+var assembly = typeof(Program).Assembly;
+var version = assembly.GetName().Version?.ToString() ?? "Unknown Version";
+var assemblyName = assembly.GetName().Name ?? "Unknown Assembly";
+var buildDate = File.GetLastWriteTime(assembly.Location);
+var startTime = DateTime.Now;
+
+// Sunucu IP adresini alma
+var host = Dns.GetHostName();
+var serverIpAddress = Dns.GetHostEntry(host)
+    .AddressList.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)?.ToString() ?? "Unknown IP";
+var ipAddresses = Dns.GetHostEntry(Dns.GetHostName())
+    .AddressList
+    .Where(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+    .Select(ip => ip.ToString())
+    .ToList();
+var machineName = Environment.MachineName;
+var userDomainName = Environment.UserDomainName;
+
+// Loglama
+var projectInfo = new
 {
-    app.UseSwagger(c =>
-    {
-        c.RouteTemplate = "swagger/{documentName}/swagger.json";
-    });
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pandora.API v1");
-    });
-}
+    ProjectName = assemblyName,
+    Version = version,
+    BuildDate = buildDate,
+    StartTime = startTime,
+    Environment = app.Environment.EnvironmentName,
+    OS = Environment.OSVersion.ToString(),
+    Runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,
+    ProcessId = Environment.ProcessId,
+    ApplicationPath = assembly.Location,
+    UserName = Environment.UserName,
+    DomainName = Environment.UserDomainName,
+    MachineName = Environment.MachineName,
+    ServerIPAddresses = ipAddresses
+};
+
+var formatted = JsonSerializer.Serialize(projectInfo, new JsonSerializerOptions
+{
+    WriteIndented = true,
+});
+
+Log.Information("Project Details:\n{ProjectDetails}", formatted);
 
 app.UseSerilogRequestLogging();
+
+if (app.Environment.IsDevelopment())
+{
+  
+}
+//Geçici olarak her durumda swagger çalýþacak.
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "swagger/{documentName}/swagger.json";
+});
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pandora.API v1");
+});
 
 //app.UseCors("AllowSpecificOrigins"); // Use the correct CORS policy here
 
 app.UseCors("AllowAll"); // Use the correct CORS policy here
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
