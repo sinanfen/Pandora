@@ -9,18 +9,18 @@ public class UserPasswordChangeDtoValidator : AbstractValidator<UserPasswordChan
     {
         // CurrentPassword validation
         RuleFor(x => x.CurrentPassword)
-            .NotEmpty().WithMessage("Mevcut şifre boş olamaz.");
+            .NotEmpty().WithMessage("Current password cannot be empty.");
    
         RuleFor(x => x.NewPassword)
-            .NotEmpty().WithMessage("Parola boş olamaz.")
-            .MinimumLength(8).WithMessage("Parola en az 8 karakter olmalıdır.")
-            .Matches(@"[A-Z]").WithMessage("Parola en az bir büyük harf içermelidir.")
-            .Matches(@"[a-z]").WithMessage("Parola en az bir küçük harf içermelidir.")
-            .Matches(@"\d").WithMessage("Parola en az bir rakam içermelidir.")
-            .Matches(@"[\W_]").WithMessage("Parola en az bir özel karakter içermelidir.");
+            .NotEmpty().WithMessage("Password cannot be empty.")
+            .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
+            .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
+            .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter.")
+            .Matches(@"\d").WithMessage("Password must contain at least one digit.")
+            .Matches(@"[\W_]").WithMessage("Password must contain at least one special character.");
 
         // PasswordRepeat validation (password confirmation)
         RuleFor(x => x.ConfirmNewPassword)
-            .Equal(x => x.NewPassword).WithMessage("Şifre tekrarı, şifre ile aynı olmalıdır.");
+            .Equal(x => x.NewPassword).WithMessage("Password confirmation must match the password.");
     }
 }

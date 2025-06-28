@@ -2,6 +2,7 @@
 using Pandora.Application.Interfaces.Security;
 using Pandora.CrossCuttingConcerns.ExceptionHandling;
 using System.Security.Authentication;
+using System.Text.RegularExpressions;
 
 namespace Pandora.Application.BusinessRules;
 
@@ -14,60 +15,55 @@ public class UserBusinessRules
         _userRepository = userRepository;
     }
 
-    // Kullanıcı adı benzersiz mi kontrol et (insert sırasında)
-    public async Task UserNameCannotBeDuplicatedWhenInserted(string username)
+    // Check if username is unique during registration
+    public async Task UsernameCannotBeDuplicatedWhenRegistering(string username)
     {
-        var exists = await _userRepository.AnyAsync(u => u.NormalizedUsername == username.ToUpperInvariant());
+        var exists = await _userRepository.AnyAsync(u => u.NormalizedUsername == username.ToUpper());
         if (exists)
         {
-            throw new BusinessException("Bu kullanıcı adı zaten alınmış.");
+            throw new BusinessException("This username is already taken.");
         }
     }
 
-    // Email benzersiz mi kontrol et (insert sırasında)
-    public async Task EmailCannotBeDuplicatedWhenInserted(string email)
+    // Check if email is unique during registration
+    public async Task EmailCannotBeDuplicatedWhenRegistering(string email)
     {
-        var exists = await _userRepository.AnyAsync(u => u.NormalizedEmail == email.ToUpperInvariant());
+        var exists = await _userRepository.AnyAsync(u => u.NormalizedEmail == email.ToUpper());
         if (exists)
         {
-            throw new BusinessException("Bu email zaten kayıtlı.");
+            throw new BusinessException("This email is already registered.");
         }
     }
 
-    // Kullanıcı adı benzersiz mi kontrol et (update sırasında)
-    public async Task UserNameCannotBeDuplicatedWhenUpdated(Guid userId, string username)
+    // Check if username is unique during update
+    public async Task UsernameCannotBeDuplicatedWhenUpdating(Guid userId, string username)
     {
-        var exists = await _userRepository.AnyAsync(u => u.NormalizedUsername == username.ToUpperInvariant() && u.Id != userId);
+        var exists = await _userRepository.AnyAsync(u => u.NormalizedUsername == username.ToUpper() && u.Id != userId);
         if (exists)
         {
-            throw new BusinessException("Bu kullanıcı adı zaten alınmış.");
+            throw new BusinessException("This username is already taken.");
         }
     }
 
-    // Email benzersiz mi kontrol et (update sırasında)
-    public async Task EmailCannotBeDuplicatedWhenUpdated(Guid userId, string email)
+    // Check if email is unique during update
+    public async Task EmailCannotBeDuplicatedWhenUpdating(Guid userId, string email)
     {
-        var exists = await _userRepository.AnyAsync(u => u.NormalizedEmail == email.ToUpperInvariant() && u.Id != userId);
+        var exists = await _userRepository.AnyAsync(u => u.NormalizedEmail == email.ToUpper() && u.Id != userId);
         if (exists)
         {
-            throw new BusinessException("Bu email zaten kayıtlı.");
+            throw new BusinessException("This email is already registered.");
         }
     }
 
-    // Password complexity rule
-    public void EnsurePasswordMeetsComplexityRules(string password)
+    // Password strength validation
+    public void PasswordMustMeetComplexityRequirements(string password)
     {
-        var specialCharacters = "!@#$%^&*()_-+=<>?{}[]|\\/~`.,;:'\"";
-
-        if (password.Length < 8 ||
-            !password.Any(char.IsDigit) ||
-            !password.Any(char.IsUpper) ||
-            !password.Any(c => specialCharacters.Contains(c)))
+        const string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
+        if (!Regex.IsMatch(password, pattern))
         {
-            throw new BusinessException("Şifre en az 8 karakter uzunluğunda, bir büyük harf, bir rakam ve bir özel karakter içermelidir.");
+            throw new BusinessException("Password must be at least 8 characters long and contain an uppercase letter, a digit, and a special character.");
         }
     }
-
 
     // Ensure the current password is correct
     public bool EnsureCurrentPasswordIsCorrect(string currentPassword, string hashedPassword, IHasher hasher)

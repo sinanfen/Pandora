@@ -8,25 +8,25 @@ public class UserRegisterDtoValidator : AbstractValidator<UserRegisterDto>
     public UserRegisterDtoValidator()
     {
         RuleFor(x => x.Username)
-            .NotEmpty().WithMessage("Kullanıcı adı boş olamaz.")
-            .MinimumLength(3).WithMessage("Kullanıcı adı en az 3 karakter olmalıdır.");
+            .NotEmpty().WithMessage("Username cannot be empty.")
+            .MinimumLength(3).WithMessage("Username must be at least 3 characters long.");
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email boş olamaz.")
-            .EmailAddress().WithMessage("Geçerli bir email adresi giriniz.");
+            .NotEmpty().WithMessage("Email cannot be empty.")
+            .EmailAddress().WithMessage("Please enter a valid email address.");
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Parola boş olamaz.")
-            .MinimumLength(8).WithMessage("Parola en az 8 karakter olmalıdır.")
-            .Matches(@"[A-Z]").WithMessage("Parola en az bir büyük harf içermelidir.")
-            .Matches(@"[a-z]").WithMessage("Parola en az bir küçük harf içermelidir.")
-            .Matches(@"\d").WithMessage("Parola en az bir rakam içermelidir.")
-            .Matches(@"[\W_]").WithMessage("Parola en az bir özel karakter içermelidir.");
+            .NotEmpty().WithMessage("Password cannot be empty.")
+            .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
+            .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
+            .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter.")
+            .Matches(@"\d").WithMessage("Password must contain at least one digit.")
+            .Matches(@"[\W_]").WithMessage("Password must contain at least one special character.");
 
         RuleFor(x => x.ConfirmPassword)
-            .Equal(x => x.Password).WithMessage("Parolalar eşleşmiyor.");
+            .Equal(x => x.Password).WithMessage("Passwords do not match.");
 
         RuleFor(x => x.PhoneNumber)
-            .NotEmpty().WithMessage("Telefon numarası boş olamaz.");
+            .NotEmpty().WithMessage("Phone number cannot be empty.");
     }
 }

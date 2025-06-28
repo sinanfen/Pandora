@@ -8,10 +8,10 @@ public class CategoryAddDtoValidator : AbstractValidator<CategoryAddDto>
     public CategoryAddDtoValidator()
     {
         RuleFor(x => x.UserId)
-        .NotEmpty().WithMessage("Kullanıcı kimliği boş olamaz.");
+        .NotEmpty().WithMessage("User ID cannot be empty.");
 
         RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Kategori adı boş olamaz.")
-            .MinimumLength(3).WithMessage("Kategori adı en az 3 karakter olmalıdır.");
+            .NotEmpty().WithMessage("Category name cannot be empty.")
+            .MinimumLength(3).WithMessage("Category name must be at least 3 characters long.");
     }
 }

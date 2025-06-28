@@ -7,34 +7,30 @@ public class PersonalVaultAddDtoValidator : AbstractValidator<PersonalVaultAddDt
 {
     public PersonalVaultAddDtoValidator()
     {
-        // Title field validation
+        // Title field validation - Simplified for flexible usage (notes, shopping lists, etc.)
         RuleFor(x => x.Title)
-            .NotEmpty().WithMessage("Başlık boş olamaz.")
-            .MinimumLength(5).WithMessage("Başlık en az 5 karakter olmalıdır.");
+            .NotEmpty().WithMessage("Title cannot be empty.");
 
-        // Content field validation
+        // Content field validation - Simplified for flexible usage
         RuleFor(x => x.Content)
-            .NotEmpty().WithMessage("İçerik boş olamaz.")
-            .MinimumLength(10).WithMessage("İçerik en az 10 karakter olmalıdır.");
+            .NotEmpty().WithMessage("Content cannot be empty.");
 
-        // URL field validation
+        // URL field validation - Made optional and only validate format when provided
         RuleFor(x => x.Url)
-            .NotEmpty().WithMessage("URL boş olamaz.")
-            .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("Geçerli bir URL giriniz.");
+            .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("Please enter a valid URL.")
+            .When(x => !string.IsNullOrEmpty(x.Url));
 
-        // Tags field validation
-        RuleFor(x => x.Tags)
-            .Must(tags => tags != null && tags.Any()).WithMessage("En az bir etiket eklemelisiniz.")
-            .When(x => x.Tags != null && x.Tags.Any());
+        // Tags field validation - Made optional, users don't have to provide tags
+        // Removed mandatory tag requirement for flexibility
 
         // Category field (optional, but if provided, it should be valid)
         RuleFor(x => x.CategoryId)
-            .NotEmpty().WithMessage("Kategori ID geçersiz.")
+            .NotEmpty().WithMessage("Category ID is invalid.")
             .When(x => x.CategoryId.HasValue);
 
         // Optional expiration date validation
         RuleFor(x => x.ExpirationDate)
-            .GreaterThan(DateTime.UtcNow).WithMessage("Son kullanma tarihi bugünden ileri bir tarih olmalıdır.")
+            .GreaterThan(DateTime.UtcNow).WithMessage("Expiration date must be a future date.")
             .When(x => x.ExpirationDate.HasValue);
     }
 }

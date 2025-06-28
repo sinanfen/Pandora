@@ -2,6 +2,10 @@
 using Pandora.Application.Interfaces.Security;
 using Pandora.CrossCuttingConcerns.ExceptionHandling;
 using System.Security.Authentication;
+using System.Text.RegularExpressions;
+using Pandora.Core.Domain.Entities;
+
+namespace Pandora.Application.BusinessRules;
 
 public class PasswordVaultBusinessRules
 {
@@ -16,51 +20,60 @@ public class PasswordVaultBusinessRules
         _encryption = encryption;
     }
 
-    public void EnsurePasswordMeetsComplexityRules(string password)
+    // Password strength validation
+    public void PasswordMustMeetComplexityRequirements(string password)
     {
-        if (password.Length < 8 || !password.Any(char.IsDigit) || !password.Any(char.IsUpper))
+        const string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$";
+        if (!Regex.IsMatch(password, pattern))
         {
-            throw new BusinessException("Şifre en az 8 karakter uzunluğunda, bir büyük harf ve bir rakam içermelidir.");
+            throw new BusinessException("Password must be at least 8 characters long and contain an uppercase letter and a digit.");
         }
     }
 
-    public void EnsurePasswordChangeIsRecent(DateTime? lastPasswordChangeDate)
+    // Check if password is expired
+    public void CheckPasswordExpiration(PasswordVault vault)
     {
-        if (lastPasswordChangeDate.HasValue && (DateTime.UtcNow - lastPasswordChangeDate.Value).Days > 90)
+        if (vault.LastPasswordChangeDate.HasValue && vault.LastPasswordChangeDate.Value.AddDays(90) < DateTime.UtcNow)
         {
-            throw new BusinessException("Bu şifre 90 günden fazla bir süredir değiştirilmedi.");
+            throw new BusinessException("This password has not been changed for more than 90 days.");
         }
     }
 
-    public void EnsurePasswordNotExpired(DateTime? passwordExpirationDate)
+    // Check password expiration date
+    public void CheckPasswordExpirationDate(PasswordVault vault)
     {
-        if (passwordExpirationDate.HasValue && passwordExpirationDate.Value < DateTime.UtcNow)
+        if (vault.PasswordExpirationDate.HasValue && vault.PasswordExpirationDate.Value < DateTime.UtcNow)
         {
-            throw new BusinessException("Bu şifrenin geçerlilik süresi dolmuş.");
+            throw new BusinessException("This password has expired.");
         }
     }
 
-    public async Task EnsurePasswordHashIsUnique(string passwordHash)
+    // Check for password reuse
+    public async Task PasswordCannotBeReused(Guid userId, string siteName, string newPasswordHash)
     {
-        var exists = await _passwordVaultRepository.AnyAsync(pv => pv.PasswordHash == passwordHash);
+        var exists = await _passwordVaultRepository.AnyAsync(pv => pv.UserId == userId && pv.SecureSiteName == siteName && pv.PasswordHash == newPasswordHash);
         if (exists)
         {
-            throw new BusinessException("Bu şifre daha önce kullanılmış.");
+            throw new BusinessException("This password has been used before.");
         }
     }
 
-    public async Task CheckCurrentPasswordAsync(Guid passwordVaultId, string currentPassword)
+    // Validate password vault exists and user access
+    public async Task ValidatePasswordVaultAccess(Guid vaultId, Guid userId)
     {
-        var passwordVault = await _passwordVaultRepository.GetAsync(pv => pv.Id == passwordVaultId);
-
-        if (passwordVault == null)
-            throw new BusinessException("Şifre kasası bulunamadı.");
-
-        // AES ile şifrelenmiş şifreyi çöz ve karşılaştır
-        //var decryptedPassword = _encryption.Decrypt(passwordVault.PasswordHash);
-
-        if (!passwordVault.PasswordHash.Equals(currentPassword))
-            throw new BusinessException("Mevcut şifre doğru değil.");
+        var vault = await _passwordVaultRepository.GetAsync(pv => pv.Id == vaultId && pv.UserId == userId);
+        if (vault == null)
+        {
+            throw new BusinessException("Password vault not found.");
+        }
     }
 
+    public void ValidateCurrentPassword(string storedPasswordHash, string providedPassword)
+    {
+        // This would typically use your hashing service to verify
+        if (storedPasswordHash != providedPassword) // Simplified check
+        {
+            throw new BusinessException("Current password is incorrect.");
+        }
+    }
 }

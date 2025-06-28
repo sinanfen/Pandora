@@ -4,22 +4,23 @@ namespace Pandora.Shared.Attributes;
 
 public class RequiredIfTrueAttribute : ValidationAttribute
 {
-    private readonly string _propertyName;
+    private readonly string _dependentProperty;
 
-    public RequiredIfTrueAttribute(string propertyName)
+    public RequiredIfTrueAttribute(string dependentProperty)
     {
-        _propertyName = propertyName;
+        _dependentProperty = dependentProperty;
     }
 
-    protected override ValidationResult IsValid(object value, ValidationContext context)
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
-        var instance = context.ObjectInstance;
-        var type = instance.GetType();
-        var boolValue = (bool)type.GetProperty(_propertyName).GetValue(instance);
+        var property = validationContext.ObjectType.GetProperty(_dependentProperty);
+        if (property == null)
+            throw new ArgumentException("Property not found", _dependentProperty);
 
-        if (boolValue && value == null)
+        var dependentValue = property.GetValue(validationContext.ObjectInstance);
+        if (dependentValue is bool boolValue && boolValue && value == null)
         {
-            return new ValidationResult($"{context.DisplayName} alanı zorunludur.");
+            return new ValidationResult($"{validationContext.DisplayName} field is required.");
         }
 
         return ValidationResult.Success;

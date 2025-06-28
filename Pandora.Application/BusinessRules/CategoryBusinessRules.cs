@@ -13,36 +13,36 @@ public class CategoryBusinessRules
         _categoryRepository = categoryRepository;
     }
 
-    // Kategori adı benzersiz mi kontrol et (insert sırasında)
+    // Check if category name is unique during insert
     public async Task CategoryNameCannotBeDuplicatedWhenInserted(string categoryName)
     {
         var exists = await _categoryRepository.AnyAsync(c => c.Name.ToUpper() == categoryName.ToUpper());
         if (exists)
         {
-            throw new BusinessException("Bu kategori adı ile zaten bir kayıt oluşturulmuş.");
+            throw new BusinessException("A category with this name already exists.");
         }
     }
 
-    // Kategori adı benzersiz mi kontrol et (update sırasında)
+    // Check if category name is unique during update
     public async Task CategoryNameCannotBeDuplicatedWhenUpdated(Guid categoryId, string categoryName)
     {
         var exists = await _categoryRepository.AnyAsync(c => c.Name.ToUpper() == categoryName.ToUpper() && c.Id != categoryId);
         if (exists)
         {
-            throw new BusinessException("Bu kategori adı ile başka bir kayıt var.");
+            throw new BusinessException("Another category with this name already exists.");
         }
     }
 
-    // Kategori güncellenebilir mi kontrol et
+    // Check if category can be deleted
     public void CategoryCannotBeDeletedIfLinkedToData(Category category)
     {
         if (category.PasswordVaults.Any())
         {
-            throw new BusinessException("Bu kategoriye bağlı veriler var, bu nedenle silinemez.");
+            throw new BusinessException("This category has linked data and cannot be deleted.");
         }
         if (category.PersonalVaults.Any())
         {
-            throw new BusinessException("Bu kategoriye bağlı veriler var, bu nedenle silinemez.");
+            throw new BusinessException("This category has linked data and cannot be deleted.");
         }
     }
 }
