@@ -36,6 +36,8 @@ public class User : Entity<Guid>
     public ICollection<PersonalVault> PersonalVaults { get; set; }
     public ICollection<Category> Categories { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } // A user can have many roles
+    public ICollection<RefreshToken> RefreshTokens { get; set; } // User's refresh tokens
+    public ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } // Email verification tokens
 
     public User() : base(Guid.NewGuid())
     {
@@ -43,5 +45,7 @@ public class User : Entity<Guid>
         PersonalVaults = new List<PersonalVault>();
         Categories = new List<Category>();
         UserRoles = new List<UserRole>();
+        RefreshTokens = new List<RefreshToken>();
+        EmailVerificationTokens = new List<EmailVerificationToken>();
     }
 }
