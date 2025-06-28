@@ -41,7 +41,7 @@ public class CategoryService : ICategoryService
             var validationResult = await _categoryAddDtoValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
-                return new DataResult<CategoryDto>(ResultStatus.Error, "Doğrulama hatası: " +
+                return new DataResult<CategoryDto>(ResultStatus.Error, "Validation error: " +
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
             }
 
@@ -50,7 +50,7 @@ public class CategoryService : ICategoryService
             Category category = _mapper.Map<Category>(dto);
             await _categoryRepository.AddAsync(category, cancellationToken);
 
-            return new DataResult<CategoryDto>(ResultStatus.Success, "Kategori başarıyla kaydedildi.", _mapper.Map<CategoryDto>(category));
+            return new DataResult<CategoryDto>(ResultStatus.Success, "Category successfully created.", _mapper.Map<CategoryDto>(category));
         }
         catch (Exception ex)
         {
@@ -66,7 +66,7 @@ public class CategoryService : ICategoryService
             var validationResult = await _categoryUpdateDtoValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
-                return new DataResult<CategoryDto>(ResultStatus.Error, "Doğrulama hatası: " +
+                return new DataResult<CategoryDto>(ResultStatus.Error, "Validation error: " +
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
             }
 
@@ -75,19 +75,19 @@ public class CategoryService : ICategoryService
             var category = await _categoryRepository.GetAsync(u => u.Id == dto.Id);
             if (category == null)
             {
-                return new DataResult<CategoryDto>(ResultStatus.Error, "Kategori bulunamadı.", null);
+                return new DataResult<CategoryDto>(ResultStatus.Error, "Category not found.", null);
             }
 
             _mapper.Map(dto, category);
             await _categoryRepository.UpdateAsync(category);
             var updatedCategoryDto = _mapper.Map<CategoryDto>(category);
 
-            return new DataResult<CategoryDto>(ResultStatus.Success, "Kategori başarıyla güncellendi.", updatedCategoryDto);
+            return new DataResult<CategoryDto>(ResultStatus.Success, "Category successfully updated.", updatedCategoryDto);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to update category. Details: {ExceptionMessage}", nameof(UpdateAsync), ex.Message);
-            return new DataResult<CategoryDto>(ResultStatus.Error, "Kategori güncellenirken hata oluştu.", data: null, ex);
+            return new DataResult<CategoryDto>(ResultStatus.Error, "An error occurred while updating the category.", data: null, ex);
         }
     }
 
@@ -98,10 +98,10 @@ public class CategoryService : ICategoryService
             Category? category = await _categoryRepository.GetAsync(x => x.Id == categoryId, cancellationToken: cancellationToken);
             if (category == null)
             {
-                return new Result(ResultStatus.Warning, "Kategori bulunamadı.");
+                return new Result(ResultStatus.Warning, "Category not found.");
             }
             await _categoryRepository.DeleteAsync(category, cancellationToken: cancellationToken);
-            return new Result(ResultStatus.Success, "Kategori başarıyla silindi.");
+            return new Result(ResultStatus.Success, "Category successfully deleted.");
         }
         catch (Exception ex)
         {

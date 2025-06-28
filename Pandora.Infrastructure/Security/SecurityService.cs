@@ -103,11 +103,11 @@ public class SecurityService : IHasher, IEncryption
         }
         catch (FormatException)
         {
-            throw new ArgumentException("Geçersiz Base64 formatı.", nameof(cipherText));
+            throw new ArgumentException("Invalid Base64 format.", nameof(cipherText));
         }
 
         if (cipherBytes.Length < IV_SIZE)
-            throw new ArgumentException("Şifrelenmiş veri çok kısa.");
+            throw new ArgumentException("Encrypted data is too short.");
 
         using (Aes aes = Aes.Create())
         {
@@ -134,7 +134,7 @@ public class SecurityService : IHasher, IEncryption
                 }
                 catch (CryptographicException ex)
                 {
-                    throw new CryptographicException("Şifre çözme başarısız. Anahtar veya veri bozuk.", ex);
+                    throw new CryptographicException("Decryption failed. Key or data is corrupted.", ex);
                 }
             }
         }

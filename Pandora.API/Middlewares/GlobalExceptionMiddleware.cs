@@ -44,7 +44,7 @@ public class GlobalExceptionMiddleware
                 errorResponse = new
                 {
                     status = statusCode,
-                    message = "Yetkisiz erişim.",
+                    message = "Unauthorized access.",
                     traceId = traceId
                 };
                 break;
@@ -53,7 +53,7 @@ public class GlobalExceptionMiddleware
                 errorResponse = new
                 {
                     status = statusCode,
-                    message = "Geçersiz istek parametresi.",
+                    message = "Invalid request parameter.",
                     traceId = traceId,
                     detail = _env.IsDevelopment() ? exception.Message : null
                 };
@@ -63,7 +63,7 @@ public class GlobalExceptionMiddleware
                 errorResponse = new
                 {
                     status = statusCode,
-                    message = "Bu özellik henüz uygulanmadı.",
+                    message = "This feature is not implemented yet.",
                     traceId = traceId,
                     detail = _env.IsDevelopment() ? exception.Message : null
                 };
@@ -73,7 +73,7 @@ public class GlobalExceptionMiddleware
                 errorResponse = new
                 {
                     status = statusCode,
-                    message = "Kayıt bulunamadı.",
+                    message = "Record not found.",
                     traceId = traceId,
                     detail = _env.IsDevelopment() ? exception.Message : null
                 };
@@ -83,7 +83,7 @@ public class GlobalExceptionMiddleware
                 errorResponse = new
                 {
                     status = statusCode,
-                    message = "Geçersiz işlem.",
+                    message = "Invalid operation.",
                     traceId = traceId,
                     detail = _env.IsDevelopment() ? exception.Message : null
                 };
@@ -93,7 +93,7 @@ public class GlobalExceptionMiddleware
                 errorResponse = new
                 {
                     status = statusCode,
-                    message = "İstek zaman aşımına uğradı.",
+                    message = "Request timed out.",
                     traceId = traceId,
                     detail = _env.IsDevelopment() ? exception.Message : null
                 };
@@ -103,7 +103,7 @@ public class GlobalExceptionMiddleware
                 errorResponse = new
                 {
                     status = statusCode,
-                    message = "Beklenmeyen bir hata oluştu.",
+                    message = "An unexpected error occurred.",
                     traceId = traceId,
                     detail = _env.IsDevelopment() ? exception.Message : null
                 };

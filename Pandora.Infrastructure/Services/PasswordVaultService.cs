@@ -13,6 +13,7 @@ using Pandora.Application.Interfaces.Security;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Infrastructure.Utilities.Results.Implementations;
 using System.Security.Cryptography;
+using Pandora.Application.BusinessRules;
 
 namespace Pandora.Infrastructure.Services;
 
@@ -49,7 +50,7 @@ public class PasswordVaultService : IPasswordVaultService
             if (!validationResult.IsValid)
                 return new DataResult<PasswordVaultDto>(ResultStatus.Error, string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
 
-            _passwordVaultBusinessRules.EnsurePasswordMeetsComplexityRules(dto.Password);
+            _passwordVaultBusinessRules.PasswordMustMeetComplexityRequirements(dto.Password);
 
             var passwordVault = _mapper.Map<PasswordVault>(dto);
 
@@ -83,7 +84,7 @@ public class PasswordVaultService : IPasswordVaultService
             //await _passwordVaultBusinessRules.CheckCurrentPasswordAsync(dto.Id, dto.Password);
 
             // Yeni şifrenin karmaşıklığını doğrula
-            _passwordVaultBusinessRules.EnsurePasswordMeetsComplexityRules(dto.NewPassword);
+            _passwordVaultBusinessRules.PasswordMustMeetComplexityRequirements(dto.NewPassword);
 
             // Yeni şifreyi AES ile şifrele ve kaydet
             passwordVault.PasswordHash = _encryption.Encrypt(dto.NewPassword);

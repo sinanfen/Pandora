@@ -27,7 +27,7 @@ public class PasswordVaultsController : ControllerBase
     {
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
-            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+            throw new UnauthorizedAccessException("User ID not found.");
         return Guid.Parse(userIdClaim.Value);
     }
 

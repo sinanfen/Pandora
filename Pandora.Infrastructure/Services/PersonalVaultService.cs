@@ -45,8 +45,10 @@ public class PersonalVaultService : IPersonalVaultService
         {
             var validationResult = await _personalVaultAddDtoValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-                return new DataResult<PersonalVaultDto>(ResultStatus.Error, "Validation Error: " +
+            {
+                return new DataResult<PersonalVaultDto>(ResultStatus.Error, "Validation error: " +
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
+            }
 
             var personalVault = _mapper.Map<PersonalVault>(dto);
 
@@ -71,7 +73,7 @@ public class PersonalVaultService : IPersonalVaultService
         {
             var validationResult = await _personalVaultUpdateDtoValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-                return new DataResult<PersonalVaultDto>(ResultStatus.Error, "Doğrulama hatası: " +
+                return new DataResult<PersonalVaultDto>(ResultStatus.Error, "Validation error: " +
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
 
             var personalVault = await _personalVaultRepository.GetAsync(x => x.Id == dto.Id, cancellationToken: cancellationToken);

@@ -27,7 +27,7 @@ public class CategoriesController : ControllerBase
     {
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
-            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+            throw new UnauthorizedAccessException("User ID not found.");
         return Guid.Parse(userIdClaim.Value);
     }
 
@@ -94,7 +94,7 @@ public class CategoriesController : ControllerBase
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
         var categoryDto = await _categoryService.GetByIdAsync(categoryUpdateDto.Id, cancellationToken);
         if (categoryDto == null || categoryDto.UserId != userId)
-            return Unauthorized("Bu kategori güncellenemez.");
+            return Unauthorized("This category cannot be updated.");
         var result = await _categoryService.UpdateAsync(categoryUpdateDto, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
@@ -114,7 +114,7 @@ public class CategoriesController : ControllerBase
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
         var categoryDto = await _categoryService.GetByIdAsync(categoryId, cancellationToken);
         if (categoryDto == null || categoryDto.UserId != userId)
-            return Unauthorized("Bu kategori silinemez.");
+            return Unauthorized("This category cannot be deleted.");
         var result = await _categoryService.DeleteAsync(categoryId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
