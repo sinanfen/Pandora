@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pandora.Infrastructure.Data.Contexts;
@@ -11,9 +12,11 @@ using Pandora.Infrastructure.Data.Contexts;
 namespace Pandora.Infrastructure.Migrations
 {
     [DbContext(typeof(PandoraDbContext))]
-    partial class PandoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628174307_AddTimeCapsuleFeatures")]
+    partial class AddTimeCapsuleFeatures
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -381,15 +384,15 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("dc7bbe32-07ac-4f2c-88ba-f81abddf2979"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 227, DateTimeKind.Utc).AddTicks(7545),
+                            Id = new Guid("bc97ab7b-00fb-4f27-9b99-edf58305a4e8"),
+                            CreatedDate = new DateTime(2025, 6, 28, 17, 43, 6, 843, DateTimeKind.Utc).AddTicks(2583),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("a97e48d0-0d5a-47a6-b032-7f84f282c42a"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 227, DateTimeKind.Utc).AddTicks(7558),
+                            Id = new Guid("ca4b53b5-4e94-423d-9149-9121c31e230c"),
+                            CreatedDate = new DateTime(2025, 6, 28, 17, 43, 6, 843, DateTimeKind.Utc).AddTicks(2634),
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -465,17 +468,8 @@ namespace Pandora.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("TwoFactorBackupCodes")
-                        .HasColumnType("text");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("TwoFactorEnabledAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("TwoFactorSecretKey")
-                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone")
@@ -499,12 +493,12 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("0fb0e9db-77ab-490d-baf0-a5f7dbd76622"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(1510),
+                            Id = new Guid("89b3d6ca-d362-4397-98cf-255d0904d32a"),
+                            CreatedDate = new DateTime(2025, 6, 28, 17, 43, 6, 843, DateTimeKind.Utc).AddTicks(5923),
                             Email = "admin@example.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
-                            LastLoginDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(1978),
+                            LastLoginDate = new DateTime(2025, 6, 28, 17, 43, 6, 843, DateTimeKind.Utc).AddTicks(6595),
                             LastName = "Admin",
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
@@ -512,18 +506,18 @@ namespace Pandora.Infrastructure.Migrations
                             PasswordHash = "d48a3b22dbfe455ae3438f7d89eb62875ddfc2234d2acc6f32132385d049f65752a5858dbb19006ff4882134264607869639798e06ec48928997f72c4ed31be5",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "b188f86b-85f8-4fa7-9324-874459d68fb3",
+                            SecurityStamp = "d9b631fa-5bea-4683-b09b-359f571cf140",
                             TwoFactorEnabled = false,
                             Username = "admin"
                         },
                         new
                         {
-                            Id = new Guid("ce80c84a-6885-45d5-9a45-2ebb129537c4"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(1981),
+                            Id = new Guid("b93c7537-b729-4748-91b3-fd25875f52db"),
+                            CreatedDate = new DateTime(2025, 6, 28, 17, 43, 6, 843, DateTimeKind.Utc).AddTicks(6597),
                             Email = "user@example.com",
                             EmailConfirmed = true,
                             FirstName = "User",
-                            LastLoginDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(2036),
+                            LastLoginDate = new DateTime(2025, 6, 28, 17, 43, 6, 843, DateTimeKind.Utc).AddTicks(6643),
                             LastName = "User",
                             LockoutEnabled = false,
                             NormalizedEmail = "USER@EXAMPLE.COM",
@@ -531,7 +525,7 @@ namespace Pandora.Infrastructure.Migrations
                             PasswordHash = "e86424a11261f6897e28276662338ebfd4b3230c1295647590ab8c510fd1557355b92fc9051296f7ac5c331a52fa5c2d22cf76c2fc61fcbd436a317e02bf53b3",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "806e5b53-4cb4-4502-a268-5d6124c1a7ea",
+                            SecurityStamp = "9e8a2176-869c-41c6-9461-72d78b9319ae",
                             TwoFactorEnabled = false,
                             Username = "user"
                         });
@@ -554,13 +548,13 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("0fb0e9db-77ab-490d-baf0-a5f7dbd76622"),
-                            RoleId = new Guid("dc7bbe32-07ac-4f2c-88ba-f81abddf2979")
+                            UserId = new Guid("89b3d6ca-d362-4397-98cf-255d0904d32a"),
+                            RoleId = new Guid("bc97ab7b-00fb-4f27-9b99-edf58305a4e8")
                         },
                         new
                         {
-                            UserId = new Guid("ce80c84a-6885-45d5-9a45-2ebb129537c4"),
-                            RoleId = new Guid("a97e48d0-0d5a-47a6-b032-7f84f282c42a")
+                            UserId = new Guid("b93c7537-b729-4748-91b3-fd25875f52db"),
+                            RoleId = new Guid("ca4b53b5-4e94-423d-9149-9121c31e230c")
                         });
                 });
 

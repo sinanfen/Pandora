@@ -30,9 +30,6 @@ public class PasswordVaultConfiguration : BaseEntityConfiguration<PasswordVault,
         builder.Property(pv => pv.LastPasswordChangeDate)
                .IsRequired(false); // Optional field
 
-        builder.Property(pv => pv.PasswordExpirationDate)
-               .IsRequired(false); // Optional field
-
         // Relationships
         builder.HasOne(pv => pv.User)
                .WithMany(u => u.PasswordVaults)

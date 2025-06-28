@@ -13,6 +13,8 @@ using System.Text.Json;
 using System.Net;
 using Pandora.API.Middlewares;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -235,5 +237,19 @@ if (app.Environment.IsProduction())
     var dbContext = scope.ServiceProvider.GetRequiredService<PandoraDbContext>();
     dbContext.Database.Migrate();
 }
+
+// Uygulama başladıktan sonra URL'leri loglama
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()?.Addresses;
+    if (addresses != null && addresses.Any())
+    {
+        Log.Information("Application is running on the following URLs: {Urls}", string.Join(", ", addresses));
+    }
+    else
+    {
+        Log.Information("Application started but no addresses were found");
+    }
+});
 
 app.Run();

@@ -27,9 +27,17 @@ public class PasswordVaultProfile : Profile
             .ForMember(dest => dest.LastPasswordChangeDate, opt => opt.MapFrom(src => DateTime.UtcNow))  // Update LastPasswordChangeDate
             .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId));
 
+        // PasswordVault → PasswordVaultDto (Navigation property'den field çekiyoruz)
         CreateMap<PasswordVault, PasswordVaultDto>()
-       .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.PasswordHash))
-       .ReverseMap();
+            .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.PasswordHash))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User != null ? src.User.Username : string.Empty));
+        
+        // PasswordVaultDto → PasswordVault (Sadece temel alanlar)
+        CreateMap<PasswordVaultDto, PasswordVault>()
+            .ForMember(dest => dest.PasswordHash, opt => opt.MapFrom(src => src.Password))
+            .ForMember(dest => dest.Category, opt => opt.Ignore()) // Navigation property'yi ignore et
+            .ForMember(dest => dest.User, opt => opt.Ignore()); // Navigation property'yi ignore et
 
     }
 }

@@ -12,6 +12,7 @@ using Pandora.Application.BusinessRules;
 using Pandora.Shared.DTOs.CategoryDTOs;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Infrastructure.Utilities.Results.Implementations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Pandora.Infrastructure.Services;
 
@@ -34,7 +35,7 @@ public class CategoryService : ICategoryService
         _categoryUpdateDtoValidator = categoryUpdateDtoValidator;
     }
 
-    public async Task<IDataResult<CategoryDto>> AddAsync(CategoryAddDto dto, CancellationToken cancellationToken)
+    public async Task<IDataResult<CategoryDto>> AddAsync(CategoryAddDto dto, Guid userId, CancellationToken cancellationToken)
     {
         try
         {
@@ -48,6 +49,7 @@ public class CategoryService : ICategoryService
             await _categoryBusinessRules.CategoryNameCannotBeDuplicatedWhenInserted(dto.Name);
 
             Category category = _mapper.Map<Category>(dto);
+            category.UserId = userId; // JWT token'dan gelen kullanıcı ID'sini set ediyoruz
             await _categoryRepository.AddAsync(category, cancellationToken);
 
             return new DataResult<CategoryDto>(ResultStatus.Success, "Category successfully created.", _mapper.Map<CategoryDto>(category));
@@ -59,7 +61,7 @@ public class CategoryService : ICategoryService
         }
     }
 
-    public async Task<IDataResult<CategoryDto>> UpdateAsync(CategoryUpdateDto dto, CancellationToken cancellationToken)
+    public async Task<IDataResult<CategoryDto>> UpdateAsync(CategoryUpdateDto dto, Guid userId, CancellationToken cancellationToken)
     {
         try
         {
@@ -72,13 +74,14 @@ public class CategoryService : ICategoryService
 
             await _categoryBusinessRules.CategoryNameCannotBeDuplicatedWhenUpdated(dto.Id, dto.Name);
 
-            var category = await _categoryRepository.GetAsync(u => u.Id == dto.Id);
+            var category = await _categoryRepository.GetAsync(u => u.Id == dto.Id && u.UserId == userId);
             if (category == null)
             {
-                return new DataResult<CategoryDto>(ResultStatus.Error, "Category not found.", null);
+                return new DataResult<CategoryDto>(ResultStatus.Error, "Category not found or unauthorized.", null);
             }
 
             _mapper.Map(dto, category);
+            category.UserId = userId; // JWT token'dan gelen kullanıcı ID'sini set ediyoruz
             await _categoryRepository.UpdateAsync(category);
             var updatedCategoryDto = _mapper.Map<CategoryDto>(category);
 
@@ -114,7 +117,9 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var pagedData = await _categoryRepository.GetListAsync(cancellationToken: cancellationToken);
+            var pagedData = await _categoryRepository.GetListAsync(
+                include: x => x.Include(c => c.User), 
+                cancellationToken: cancellationToken);
             var categoryDtos = _mapper.Map<List<CategoryDto>>(pagedData.Items);
             return categoryDtos;
         }
@@ -129,7 +134,10 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var pagedData = await _categoryRepository.GetListAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
+            var pagedData = await _categoryRepository.GetListAsync(
+                x => x.UserId == userId, 
+                include: x => x.Include(c => c.User), 
+                cancellationToken: cancellationToken);
             var categoryDtos = _mapper.Map<List<CategoryDto>>(pagedData.Items);
             return categoryDtos;
         }
@@ -158,7 +166,10 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            Category? category = await _categoryRepository.GetAsync(x => x.Id == categoryId, cancellationToken: cancellationToken);
+            Category? category = await _categoryRepository.GetAsync(
+                x => x.Id == categoryId, 
+                include: x => x.Include(c => c.User), 
+                cancellationToken: cancellationToken);
             return _mapper.Map<CategoryDto>(category);
         }
         catch (Exception ex)
@@ -172,7 +183,10 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            Category? category = await _categoryRepository.GetAsync(x => x.Id == categoryId && x.UserId == userId, cancellationToken: cancellationToken);
+            Category? category = await _categoryRepository.GetAsync(
+                x => x.Id == categoryId && x.UserId == userId, 
+                include: x => x.Include(c => c.User), 
+                cancellationToken: cancellationToken);
             return _mapper.Map<CategoryDto>(category);
         }
         catch (Exception ex)

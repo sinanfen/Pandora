@@ -346,4 +346,52 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    /// <summary>
+    /// 🔐 Complete two-factor authentication login
+    /// </summary>
+    [HttpPost("verify-2fa")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Verify 2FA code", Description = "Complete the two-factor authentication process after initial login")]
+    [SwaggerResponse(200, "2FA verification successful", typeof(TokenDto))]
+    [SwaggerResponse(400, "Invalid 2FA code or temp token")]
+    public async Task<IActionResult> VerifyTwoFactorAsync([FromBody] TwoFactorLoginDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var ipAddress = GetClientIpAddress();
+        var userAgent = GetClientUserAgent();
+        
+        var result = await _authService.VerifyTwoFactorAsync(dto, ipAddress, userAgent, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// 🔄 Resend temp token for 2FA login
+    /// </summary>
+    [HttpPost("resend-temp-token")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Resend temp token", Description = "Generate new temporary token for 2FA login when the previous one expired")]
+    [SwaggerResponse(200, "New temp token generated", typeof(TokenDto))]
+    [SwaggerResponse(400, "Invalid credentials or 2FA not enabled")]
+    public async Task<IActionResult> ResendTempTokenAsync([FromBody] UserLoginDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var ipAddress = GetClientIpAddress();
+        var userAgent = GetClientUserAgent();
+        
+        var result = await _authService.ResendTempTokenAsync(dto, ipAddress, userAgent, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
+    }
 }

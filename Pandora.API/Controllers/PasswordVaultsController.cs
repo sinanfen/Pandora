@@ -14,10 +14,12 @@ namespace Pandora.API.Controllers;
 public class PasswordVaultsController : ControllerBase
 {
     private readonly IPasswordVaultService _passwordVaultService;
+    private readonly ILogger<PasswordVaultsController> _logger;
 
-    public PasswordVaultsController(IPasswordVaultService passwordVaultService)
+    public PasswordVaultsController(IPasswordVaultService passwordVaultService, ILogger<PasswordVaultsController> logger)
     {
         _passwordVaultService = passwordVaultService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -74,7 +76,8 @@ public class PasswordVaultsController : ControllerBase
     [SwaggerResponse(400, "Invalid input or creation failed")]
     public async Task<IActionResult> AddAsync([FromBody] PasswordVaultAddDto dto, CancellationToken cancellationToken)
     {
-        var result = await _passwordVaultService.AddAsync(dto, cancellationToken);
+        var userId = GetLoggedInUserId(); // JWT token'dan kullanıcı ID'sini al
+        var result = await _passwordVaultService.AddAsync(dto, userId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result.Data);
@@ -91,10 +94,7 @@ public class PasswordVaultsController : ControllerBase
     public async Task<IActionResult> UpdateAsync([FromBody] PasswordVaultUpdateDto dto, CancellationToken cancellationToken)
     {
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
-        var passwordVault = await _passwordVaultService.GetByIdAsync(dto.Id, cancellationToken);
-        if (passwordVault == null || passwordVault.UserId != userId)
-            return Unauthorized("You are not authorized to take this action.");
-        var result = await _passwordVaultService.UpdateAsync(dto, cancellationToken);
+        var result = await _passwordVaultService.UpdateAsync(dto, userId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result.Data);
@@ -118,4 +118,84 @@ public class PasswordVaultsController : ControllerBase
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result.Message);
     }
+
+    #region Password Health Monitoring
+
+    [HttpGet("health/report")]
+    public async Task<IActionResult> GetPasswordHealthReport(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = GetLoggedInUserId();
+            var result = await _passwordVaultService.GetPasswordHealthReportAsync(userId, cancellationToken);
+            
+            return result.ResultStatus == ResultStatus.Success 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting password health report");
+            return StatusCode(500, "An error occurred while generating password health report");
+        }
+    }
+
+    [HttpGet("health/duplicates")]
+    public async Task<IActionResult> GetDuplicatePasswords(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = GetLoggedInUserId();
+            var result = await _passwordVaultService.GetDuplicatePasswordsAsync(userId, cancellationToken);
+            
+            return result.ResultStatus == ResultStatus.Success 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting duplicate passwords");
+            return StatusCode(500, "An error occurred while analyzing duplicate passwords");
+        }
+    }
+
+    [HttpGet("health/weak")]
+    public async Task<IActionResult> GetWeakPasswords(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = GetLoggedInUserId();
+            var result = await _passwordVaultService.GetWeakPasswordsAsync(userId, cancellationToken);
+            
+            return result.ResultStatus == ResultStatus.Success 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting weak passwords");
+            return StatusCode(500, "An error occurred while analyzing weak passwords");
+        }
+    }
+
+    [HttpGet("health/score")]
+    public async Task<IActionResult> GetSecurityScore(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = GetLoggedInUserId();
+            var result = await _passwordVaultService.GetSecurityScoreAsync(userId, cancellationToken);
+            
+            return result.ResultStatus == ResultStatus.Success 
+                ? Ok(result) 
+                : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting security score");
+            return StatusCode(500, "An error occurred while calculating security score");
+        }
+    }
+
+    #endregion
 }

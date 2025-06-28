@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using AutoMapper;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using Pandora.Core.Domain.Entities;
 using Pandora.Application.Interfaces.Repositories;
 using Pandora.Shared.DTOs.UserDTOs;
@@ -29,10 +30,14 @@ public class AuthService : IAuthService
     private readonly IEmailVerificationTokenRepository _emailVerificationTokenRepository;
     private readonly IEmailService _emailService;
     private readonly IMapper _mapper;
+    private readonly ITwoFactorService _twoFactorService;
+    private readonly ITempTokenService _tempTokenService;
+    private readonly IEncryption _encryption;
 
     public AuthService(IConfiguration configuration, IHasher hasher, IUserService userService, IMapper mapper, 
         IUserRepository userRepository, IRoleRepository roleRepository, IRefreshTokenRepository refreshTokenRepository,
-        IEmailVerificationTokenRepository emailVerificationTokenRepository, IEmailService emailService)
+        IEmailVerificationTokenRepository emailVerificationTokenRepository, IEmailService emailService,
+        ITwoFactorService twoFactorService, ITempTokenService tempTokenService, IEncryption encryption)
     {
         _configuration = configuration;
         _hasher = hasher;
@@ -43,6 +48,9 @@ public class AuthService : IAuthService
         _refreshTokenRepository = refreshTokenRepository;
         _emailVerificationTokenRepository = emailVerificationTokenRepository;
         _emailService = emailService;
+        _twoFactorService = twoFactorService;
+        _tempTokenService = tempTokenService;
+        _encryption = encryption;
     }
 
     public async Task<IDataResult<TokenDto>> LoginAsync(UserLoginDto dto, string ipAddress, string userAgent, CancellationToken cancellationToken)
@@ -64,6 +72,20 @@ public class AuthService : IAuthService
         var isPasswordValid = VerifyPassword(userEntity.PasswordHash, dto.Password);
         if (!isPasswordValid)
             return new DataResult<TokenDto>(ResultStatus.Error, "Invalid password", data: null);
+
+        // 🔐 Check if 2FA is enabled
+        if (userEntity.TwoFactorEnabled)
+        {
+            // Generate temporary token for 2FA flow
+            var tempToken = await _tempTokenService.CreateTempTokenAsync(userEntity.Id, ipAddress, userAgent);
+            
+            return new DataResult<TokenDto>(ResultStatus.Success, "🔐 Two-factor authentication required", 
+                new TokenDto 
+                { 
+                    RequiresTwoFactor = true, 
+                    TempToken = tempToken 
+                });
+        }
 
         // Update last login
         userEntity.LastLoginDate = DateTime.UtcNow;
@@ -411,5 +433,319 @@ public class AuthService : IAuthService
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomBytes);
         return Convert.ToBase64String(randomBytes).Replace("+", "-").Replace("/", "_").Replace("=", "");
+    }
+
+    // 🔐 Two-Factor Authentication Methods
+    
+    public async Task<IDataResult<TwoFactorSetupDto>> SetupTwoFactorAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId, cancellationToken: cancellationToken);
+        if (user == null)
+            return new DataResult<TwoFactorSetupDto>(ResultStatus.Error, "User not found", null);
+
+        if (user.TwoFactorEnabled)
+            return new DataResult<TwoFactorSetupDto>(ResultStatus.Error, "Two-factor authentication is already enabled", null);
+
+        // Generate secret key and backup codes
+        var secretKey = _twoFactorService.GenerateSecretKey();
+        var backupCodes = _twoFactorService.GenerateBackupCodes();
+        var qrCodeUri = _twoFactorService.GenerateQrCodeUri(secretKey, user.Email);
+        var manualEntryKey = _twoFactorService.FormatSecretKeyForDisplay(secretKey);
+
+        // Temporarily store the secret and backup codes (encrypted) without enabling 2FA yet
+        user.TwoFactorSecretKey = _encryption.Encrypt(secretKey);
+        user.TwoFactorBackupCodes = _encryption.Encrypt(JsonSerializer.Serialize(backupCodes));
+        await _userRepository.UpdateAsync(user);
+
+        var setupDto = new TwoFactorSetupDto
+        {
+            SecretKey = secretKey,
+            QrCodeUri = qrCodeUri,
+            ManualEntryKey = manualEntryKey,
+            BackupCodes = backupCodes
+        };
+
+        return new DataResult<TwoFactorSetupDto>(ResultStatus.Success, "🔐 Two-factor authentication setup prepared", setupDto);
+    }
+
+    public async Task<IResult> EnableTwoFactorAsync(Guid userId, TwoFactorToggleDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId, cancellationToken: cancellationToken);
+        if (user == null)
+            return new Result(ResultStatus.Error, "User not found");
+
+        if (user.TwoFactorEnabled)
+            return new Result(ResultStatus.Error, "Two-factor authentication is already enabled");
+
+        // Verify current password
+        if (!VerifyPassword(user.PasswordHash, dto.CurrentPassword))
+            return new Result(ResultStatus.Error, "Current password is incorrect");
+
+        // Check if setup was done and secret key exists
+        if (string.IsNullOrEmpty(user.TwoFactorSecretKey))
+            return new Result(ResultStatus.Error, "Please complete 2FA setup first by calling /setup-2fa endpoint");
+
+        // Verify the 2FA code
+        if (string.IsNullOrEmpty(dto.VerificationCode))
+            return new Result(ResultStatus.Error, "Verification code is required");
+
+        var secretKey = _encryption.Decrypt(user.TwoFactorSecretKey);
+        var isCodeValid = _twoFactorService.VerifyCode(secretKey, dto.VerificationCode);
+
+        if (!isCodeValid)
+        {
+            // Also check backup codes
+            var backupCodesJson = _encryption.Decrypt(user.TwoFactorBackupCodes ?? "");
+            if (!string.IsNullOrEmpty(backupCodesJson))
+            {
+                var backupCodes = JsonSerializer.Deserialize<List<string>>(backupCodesJson) ?? new List<string>();
+                isCodeValid = _twoFactorService.VerifyBackupCode(backupCodes, dto.VerificationCode);
+
+                if (isCodeValid)
+                {
+                    // Remove used backup code
+                    var updatedCodes = _twoFactorService.RemoveUsedBackupCode(backupCodes, dto.VerificationCode);
+                    user.TwoFactorBackupCodes = _encryption.Encrypt(JsonSerializer.Serialize(updatedCodes));
+                }
+            }
+        }
+
+        if (!isCodeValid)
+            return new Result(ResultStatus.Error, "Invalid verification code");
+
+        // Enable 2FA
+        user.TwoFactorEnabled = true;
+        user.TwoFactorEnabledAt = DateTime.UtcNow;
+        user.UpdatedDate = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+
+        return new Result(ResultStatus.Success, "🎉 Two-factor authentication enabled successfully! Your account is now more secure.");
+    }
+
+    public async Task<IResult> DisableTwoFactorAsync(Guid userId, TwoFactorToggleDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId, cancellationToken: cancellationToken);
+        if (user == null)
+            return new Result(ResultStatus.Error, "User not found");
+
+        if (!user.TwoFactorEnabled)
+            return new Result(ResultStatus.Error, "Two-factor authentication is not enabled");
+
+        // Verify current password
+        if (!VerifyPassword(user.PasswordHash, dto.CurrentPassword))
+            return new Result(ResultStatus.Error, "Current password is incorrect");
+
+        // Disable 2FA and clear secrets
+        user.TwoFactorEnabled = false;
+        user.TwoFactorSecretKey = null;
+        user.TwoFactorBackupCodes = null;
+        user.TwoFactorEnabledAt = null;
+        user.UpdatedDate = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+
+        return new Result(ResultStatus.Success, "⚠️ Two-factor authentication disabled. Your account security has been reduced.");
+    }
+
+    public async Task<IDataResult<TwoFactorStatusDto>> GetTwoFactorStatusAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId, cancellationToken: cancellationToken);
+        if (user == null)
+            return new DataResult<TwoFactorStatusDto>(ResultStatus.Error, "User not found", null);
+
+        var backupCodesCount = 0;
+        if (!string.IsNullOrEmpty(user.TwoFactorBackupCodes))
+        {
+            try
+            {
+                var backupCodesJson = _encryption.Decrypt(user.TwoFactorBackupCodes);
+                var backupCodes = JsonSerializer.Deserialize<List<string>>(backupCodesJson) ?? new List<string>();
+                backupCodesCount = backupCodes.Count;
+            }
+            catch
+            {
+                // Ignore decrypt errors
+            }
+        }
+
+        var status = new TwoFactorStatusDto
+        {
+            IsEnabled = user.TwoFactorEnabled,
+            EnabledAt = user.TwoFactorEnabledAt,
+            BackupCodesRemaining = backupCodesCount
+        };
+
+        return new DataResult<TwoFactorStatusDto>(ResultStatus.Success, "2FA status retrieved", status);
+    }
+
+    public async Task<IDataResult<TokenDto>> VerifyTwoFactorAsync(TwoFactorLoginDto dto, string ipAddress, string userAgent, CancellationToken cancellationToken = default)
+    {
+        // Validate and consume temporary token
+        var tempTokenData = await _tempTokenService.ValidateAndConsumeTempTokenAsync(dto.TempToken);
+        if (tempTokenData == null)
+            return new DataResult<TokenDto>(ResultStatus.Error, "Invalid or expired temporary token", null);
+
+        var user = await _userRepository.GetAsync(u => u.Id == tempTokenData.UserId, cancellationToken: cancellationToken);
+        if (user == null)
+            return new DataResult<TokenDto>(ResultStatus.Error, "User not found", null);
+
+        if (!user.TwoFactorEnabled || string.IsNullOrEmpty(user.TwoFactorSecretKey))
+            return new DataResult<TokenDto>(ResultStatus.Error, "Two-factor authentication is not enabled", null);
+
+        // Verify the 2FA code
+        var secretKey = _encryption.Decrypt(user.TwoFactorSecretKey);
+        var isCodeValid = _twoFactorService.VerifyCode(secretKey, dto.Code);
+        var wasBackupCodeUsed = false;
+
+        if (!isCodeValid)
+        {
+            // Check backup codes
+            if (!string.IsNullOrEmpty(user.TwoFactorBackupCodes))
+            {
+                var backupCodesJson = _encryption.Decrypt(user.TwoFactorBackupCodes);
+                var backupCodes = JsonSerializer.Deserialize<List<string>>(backupCodesJson) ?? new List<string>();
+                isCodeValid = _twoFactorService.VerifyBackupCode(backupCodes, dto.Code);
+
+                if (isCodeValid)
+                {
+                    wasBackupCodeUsed = true;
+                    // Remove used backup code
+                    var updatedCodes = _twoFactorService.RemoveUsedBackupCode(backupCodes, dto.Code);
+                    user.TwoFactorBackupCodes = _encryption.Encrypt(JsonSerializer.Serialize(updatedCodes));
+                }
+            }
+        }
+
+        if (!isCodeValid)
+            return new DataResult<TokenDto>(ResultStatus.Error, "Invalid verification code", null);
+
+        // Update last login
+        user.LastLoginDate = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+
+        // Generate tokens
+        var tokenDto = await GenerateTokensAsync(user, ipAddress, userAgent, cancellationToken);
+
+        var message = wasBackupCodeUsed ? 
+            "🔓 Login successful using backup code. Consider generating new backup codes." : 
+            "🔓 Login successful with 2FA verification";
+
+        return new DataResult<TokenDto>(ResultStatus.Success, message, tokenDto);
+    }
+
+    public async Task<IDataResult<List<string>>> GenerateNewBackupCodesAsync(Guid userId, string currentPassword, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId, cancellationToken: cancellationToken);
+        if (user == null)
+            return new DataResult<List<string>>(ResultStatus.Error, "User not found", null);
+
+        if (!user.TwoFactorEnabled)
+            return new DataResult<List<string>>(ResultStatus.Error, "Two-factor authentication is not enabled", null);
+
+        // Verify current password
+        if (!VerifyPassword(user.PasswordHash, currentPassword))
+            return new DataResult<List<string>>(ResultStatus.Error, "Current password is incorrect", null);
+
+        // Generate new backup codes
+        var newBackupCodes = _twoFactorService.GenerateBackupCodes();
+        user.TwoFactorBackupCodes = _encryption.Encrypt(JsonSerializer.Serialize(newBackupCodes));
+        user.UpdatedDate = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+
+        return new DataResult<List<string>>(ResultStatus.Success, "🔄 New backup codes generated", newBackupCodes);
+    }
+
+    public async Task<IDataResult<TwoFactorSetupDto>> ResendTwoFactorSetupAsync(Guid userId, bool forceNew = false, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId, cancellationToken: cancellationToken);
+        if (user == null)
+            return new DataResult<TwoFactorSetupDto>(ResultStatus.Error, "User not found", null);
+
+        if (user.TwoFactorEnabled)
+            return new DataResult<TwoFactorSetupDto>(ResultStatus.Error, "Two-factor authentication is already enabled. Disable it first to regenerate setup.", null);
+
+        string secretKey;
+        List<string> backupCodes;
+
+        // 🔄 Use existing secret if available and not forcing new
+        if (!forceNew && !string.IsNullOrEmpty(user.TwoFactorSecretKey))
+        {
+            secretKey = _encryption.Decrypt(user.TwoFactorSecretKey);
+            
+            // Get existing backup codes or generate new ones
+            if (!string.IsNullOrEmpty(user.TwoFactorBackupCodes))
+            {
+                var backupCodesJson = _encryption.Decrypt(user.TwoFactorBackupCodes);
+                backupCodes = JsonSerializer.Deserialize<List<string>>(backupCodesJson) ?? _twoFactorService.GenerateBackupCodes();
+            }
+            else
+            {
+                backupCodes = _twoFactorService.GenerateBackupCodes();
+                user.TwoFactorBackupCodes = _encryption.Encrypt(JsonSerializer.Serialize(backupCodes));
+                await _userRepository.UpdateAsync(user);
+            }
+        }
+        else
+        {
+            // 🆕 Generate completely new secret and backup codes
+            secretKey = _twoFactorService.GenerateSecretKey();
+            backupCodes = _twoFactorService.GenerateBackupCodes();
+
+            user.TwoFactorSecretKey = _encryption.Encrypt(secretKey);
+            user.TwoFactorBackupCodes = _encryption.Encrypt(JsonSerializer.Serialize(backupCodes));
+            await _userRepository.UpdateAsync(user);
+        }
+
+        var qrCodeUri = _twoFactorService.GenerateQrCodeUri(secretKey, user.Email);
+        var manualEntryKey = _twoFactorService.FormatSecretKeyForDisplay(secretKey);
+
+        var setupDto = new TwoFactorSetupDto
+        {
+            SecretKey = secretKey,
+            QrCodeUri = qrCodeUri,
+            ManualEntryKey = manualEntryKey,
+            BackupCodes = backupCodes
+        };
+
+        var message = forceNew ? 
+            "🆕 New 2FA setup generated" : 
+            "🔄 2FA setup resent (existing secret reused)";
+
+        return new DataResult<TwoFactorSetupDto>(ResultStatus.Success, message, setupDto);
+    }
+
+    public async Task<IDataResult<TokenDto>> ResendTempTokenAsync(UserLoginDto dto, string ipAddress, string userAgent, CancellationToken cancellationToken = default)
+    {
+        User? userEntity = null;
+
+        if (IsValidEmail(dto.UsernameOrEmail))
+            userEntity = await _userService.GetEntityByEmailAsync(dto.UsernameOrEmail, cancellationToken);
+        else
+            userEntity = await _userService.GetEntityByUsernameAsync(dto.UsernameOrEmail, cancellationToken);
+
+        if (userEntity == null)
+            return new DataResult<TokenDto>(ResultStatus.Error, "User not found", null);
+
+        // Check if email is verified
+        if (!userEntity.EmailConfirmed)
+            return new DataResult<TokenDto>(ResultStatus.Error, "Email address is not verified", null);
+
+        // Verify password
+        var isPasswordValid = VerifyPassword(userEntity.PasswordHash, dto.Password);
+        if (!isPasswordValid)
+            return new DataResult<TokenDto>(ResultStatus.Error, "Invalid password", null);
+
+        // Check if 2FA is actually enabled
+        if (!userEntity.TwoFactorEnabled)
+            return new DataResult<TokenDto>(ResultStatus.Error, "Two-factor authentication is not enabled for this account", null);
+
+        // Generate new temporary token
+        var tempToken = await _tempTokenService.CreateTempTokenAsync(userEntity.Id, ipAddress, userAgent);
+        
+        return new DataResult<TokenDto>(ResultStatus.Success, "🔄 New temporary token generated for 2FA verification", 
+            new TokenDto 
+            { 
+                RequiresTwoFactor = true, 
+                TempToken = tempToken 
+            });
     }
 }

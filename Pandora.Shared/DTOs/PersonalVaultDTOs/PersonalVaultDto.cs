@@ -14,6 +14,11 @@ public class PersonalVaultDto : BaseDto<Guid>
     public string? SecureMediaFile { get; set; }  // AES-encrypted media file path, if any
     public bool IsLocked { get; set; } // Varsayılan değer false
     public DateTime? UnlockDate { get; set; } // Kilit açılma tarihi (en az 1 ay sonrası)
+    // Time Capsule Sharing
+    public bool IsShareable { get; set; }
+    public string? ShareToken { get; set; }
+    public DateTime? SharedAt { get; set; }
+    public int ShareViewCount { get; set; }
     // Metadata
     public DateTime CreatedDate { get; set; }
     public DateTime? LastModifiedDate { get; set; }
@@ -23,5 +28,5 @@ public class PersonalVaultDto : BaseDto<Guid>
     public bool IsFavorite { get; set; }  // Whether the entry is marked as favorite
     // Category details
     public Guid? CategoryId { get; set; }
-    public string CategoryName { get; set; }  // Name of the associated category, if any
+    public string CategoryName { get; set; } = string.Empty;
 }

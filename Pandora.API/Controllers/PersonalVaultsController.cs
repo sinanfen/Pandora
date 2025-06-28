@@ -75,7 +75,8 @@ public class PersonalVaultsController : ControllerBase
     [SwaggerResponse(400, "Invalid input or creation failed")]
     public async Task<IActionResult> AddAsync([FromBody] PersonalVaultAddDto dto, CancellationToken cancellationToken)
     {
-        var result = await _personalVaultService.AddAsync(dto, cancellationToken);
+        var userId = GetLoggedInUserId(); // JWT token'dan kullanıcı ID'sini al
+        var result = await _personalVaultService.AddAsync(dto, userId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result.Data);
@@ -92,10 +93,7 @@ public class PersonalVaultsController : ControllerBase
     public async Task<IActionResult> UpdateAsync([FromBody] PersonalVaultUpdateDto dto, CancellationToken cancellationToken)
     {
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
-        var personalVault = await _personalVaultService.GetByIdAsync(dto.Id, cancellationToken);
-        if (personalVault == null || personalVault.UserId != userId)
-            return Unauthorized("You are not authorized to take this action.");
-        var result = await _personalVaultService.UpdateAsync(dto, cancellationToken);
+        var result = await _personalVaultService.UpdateAsync(dto, userId, cancellationToken);
         if (result.ResultStatus == ResultStatus.Error)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result.Data);
@@ -118,5 +116,24 @@ public class PersonalVaultsController : ControllerBase
         if (result.ResultStatus == ResultStatus.Error)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result.Message);
+    }
+
+    /// <summary>
+    /// Generates a shareable link for a locked time capsule.
+    /// </summary>
+    [HttpPost("{personalVaultId}/generate-share-link")]
+    [SwaggerOperation(Summary = "Generate share link for time capsule", Description = "Creates a shareable link for a locked time capsule. Only locked vaults can be shared.")]
+    [SwaggerResponse(200, "Share link generated successfully")]
+    [SwaggerResponse(400, "Invalid request or vault is not locked")]
+    [SwaggerResponse(401, "Unauthorized access")]
+    public async Task<IActionResult> GenerateShareLinkAsync(Guid personalVaultId, CancellationToken cancellationToken)
+    {
+        var userId = GetLoggedInUserId();
+        var result = await _personalVaultService.GenerateShareLinkAsync(personalVaultId, userId, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+            
+        return Ok(new { ShareLink = result.Data, Message = result.Message });
     }
 }

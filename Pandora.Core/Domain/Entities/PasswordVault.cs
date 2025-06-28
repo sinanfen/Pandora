@@ -21,9 +21,6 @@ public class PasswordVault : Entity<Guid>
     // Date when the password was last changed
     public DateTime? LastPasswordChangeDate { get; set; }
 
-    // Optional expiration date for the password
-    public DateTime? PasswordExpirationDate { get; set; }
-
     // Optional field for linking the credential to a category
     public Guid? CategoryId { get; set; }
     public Category Category { get; set; }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pandora.Infrastructure.Data.Contexts;
@@ -11,9 +12,11 @@ using Pandora.Infrastructure.Data.Contexts;
 namespace Pandora.Infrastructure.Migrations
 {
     [DbContext(typeof(PandoraDbContext))]
-    partial class PandoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628161855_RemovePasswordExpirationDate")]
+    partial class RemovePasswordExpirationDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,9 +222,6 @@ namespace Pandora.Infrastructure.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsShareable")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -247,15 +247,6 @@ namespace Pandora.Infrastructure.Migrations
                     b.Property<string>("SecureUrl")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<string>("ShareToken")
-                        .HasColumnType("text");
-
-                    b.Property<int>("ShareViewCount")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("SharedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("UnlockDate")
                         .HasColumnType("timestamp with time zone");
@@ -381,15 +372,15 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("dc7bbe32-07ac-4f2c-88ba-f81abddf2979"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 227, DateTimeKind.Utc).AddTicks(7545),
+                            Id = new Guid("6493d2f0-4096-4256-b8ea-10a6722b6581"),
+                            CreatedDate = new DateTime(2025, 6, 28, 16, 18, 55, 430, DateTimeKind.Utc).AddTicks(3450),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("a97e48d0-0d5a-47a6-b032-7f84f282c42a"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 227, DateTimeKind.Utc).AddTicks(7558),
+                            Id = new Guid("0a171143-f7fd-4193-a59c-20ce9488f5d7"),
+                            CreatedDate = new DateTime(2025, 6, 28, 16, 18, 55, 430, DateTimeKind.Utc).AddTicks(3462),
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -465,17 +456,8 @@ namespace Pandora.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("TwoFactorBackupCodes")
-                        .HasColumnType("text");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("TwoFactorEnabledAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("TwoFactorSecretKey")
-                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone")
@@ -499,12 +481,12 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("0fb0e9db-77ab-490d-baf0-a5f7dbd76622"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(1510),
+                            Id = new Guid("c4998627-3244-4d0c-84fb-1440710529ce"),
+                            CreatedDate = new DateTime(2025, 6, 28, 16, 18, 55, 430, DateTimeKind.Utc).AddTicks(7095),
                             Email = "admin@example.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
-                            LastLoginDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(1978),
+                            LastLoginDate = new DateTime(2025, 6, 28, 16, 18, 55, 430, DateTimeKind.Utc).AddTicks(7586),
                             LastName = "Admin",
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
@@ -512,18 +494,18 @@ namespace Pandora.Infrastructure.Migrations
                             PasswordHash = "d48a3b22dbfe455ae3438f7d89eb62875ddfc2234d2acc6f32132385d049f65752a5858dbb19006ff4882134264607869639798e06ec48928997f72c4ed31be5",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "b188f86b-85f8-4fa7-9324-874459d68fb3",
+                            SecurityStamp = "6b55cf32-5062-46e2-b94d-3313faaec9b8",
                             TwoFactorEnabled = false,
                             Username = "admin"
                         },
                         new
                         {
-                            Id = new Guid("ce80c84a-6885-45d5-9a45-2ebb129537c4"),
-                            CreatedDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(1981),
+                            Id = new Guid("4ee0dd59-5877-4aeb-8b35-2b83149617f7"),
+                            CreatedDate = new DateTime(2025, 6, 28, 16, 18, 55, 430, DateTimeKind.Utc).AddTicks(7588),
                             Email = "user@example.com",
                             EmailConfirmed = true,
                             FirstName = "User",
-                            LastLoginDate = new DateTime(2025, 6, 28, 18, 19, 56, 228, DateTimeKind.Utc).AddTicks(2036),
+                            LastLoginDate = new DateTime(2025, 6, 28, 16, 18, 55, 430, DateTimeKind.Utc).AddTicks(7637),
                             LastName = "User",
                             LockoutEnabled = false,
                             NormalizedEmail = "USER@EXAMPLE.COM",
@@ -531,7 +513,7 @@ namespace Pandora.Infrastructure.Migrations
                             PasswordHash = "e86424a11261f6897e28276662338ebfd4b3230c1295647590ab8c510fd1557355b92fc9051296f7ac5c331a52fa5c2d22cf76c2fc61fcbd436a317e02bf53b3",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "806e5b53-4cb4-4502-a268-5d6124c1a7ea",
+                            SecurityStamp = "2ad656aa-76f1-4ed0-862d-a7403600d0be",
                             TwoFactorEnabled = false,
                             Username = "user"
                         });
@@ -554,13 +536,13 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("0fb0e9db-77ab-490d-baf0-a5f7dbd76622"),
-                            RoleId = new Guid("dc7bbe32-07ac-4f2c-88ba-f81abddf2979")
+                            UserId = new Guid("c4998627-3244-4d0c-84fb-1440710529ce"),
+                            RoleId = new Guid("6493d2f0-4096-4256-b8ea-10a6722b6581")
                         },
                         new
                         {
-                            UserId = new Guid("ce80c84a-6885-45d5-9a45-2ebb129537c4"),
-                            RoleId = new Guid("a97e48d0-0d5a-47a6-b032-7f84f282c42a")
+                            UserId = new Guid("4ee0dd59-5877-4aeb-8b35-2b83149617f7"),
+                            RoleId = new Guid("0a171143-f7fd-4193-a59c-20ce9488f5d7")
                         });
                 });
 

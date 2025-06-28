@@ -22,6 +22,9 @@ public class User : Entity<Guid>
 
     // Two-factor authentication
     public bool TwoFactorEnabled { get; set; }
+    public string? TwoFactorSecretKey { get; set; } // TOTP secret key (encrypted)
+    public DateTime? TwoFactorEnabledAt { get; set; }
+    public string? TwoFactorBackupCodes { get; set; } // JSON array of backup codes (encrypted)
 
     // Optional user information
     public string PhoneNumber { get; set; }

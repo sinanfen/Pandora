@@ -24,11 +24,18 @@ CancellationToken cancellationToken = default);
       bool withDeleted = false,
       bool enableTracking = true,
       CancellationToken cancellationToken = default);
-    Task<IDataResult<PasswordVaultDto>> AddAsync(PasswordVaultAddDto dto, CancellationToken cancellationToken);
-    Task<IDataResult<PasswordVaultDto>> UpdateAsync(PasswordVaultUpdateDto dto, CancellationToken cancellationToken);
+    Task<IDataResult<PasswordVaultDto>> AddAsync(PasswordVaultAddDto dto, Guid userId, CancellationToken cancellationToken);
+    Task<IDataResult<PasswordVaultDto>> UpdateAsync(PasswordVaultUpdateDto dto, Guid userId, CancellationToken cancellationToken);
     Task<IResult> DeleteAsync(Guid passwordVaultId, CancellationToken cancellationToken);
     Task<PasswordVaultDto> GetByIdAsync(Guid passwordVaultId, CancellationToken cancellationToken);
     Task<IDataResult<PasswordVaultDto>> GetByIdAndUserAsync(Guid passwordVaultId, Guid userId, CancellationToken cancellationToken);
     Task<List<PasswordVaultDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false);
     Task<List<PasswordVaultDto>> GetAllByUserAsync(Guid userId, CancellationToken cancellationToken, bool withDeleted = false);
+
+
+    // Password Health Monitoring
+    Task<IDataResult<PasswordHealthReportDto>> GetPasswordHealthReportAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<IDataResult<List<DuplicatePasswordDto>>> GetDuplicatePasswordsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<IDataResult<List<WeakPasswordDto>>> GetWeakPasswordsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<IDataResult<SecurityScoreDto>> GetSecurityScoreAsync(Guid userId, CancellationToken cancellationToken = default);
 }

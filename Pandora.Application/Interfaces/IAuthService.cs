@@ -76,4 +76,45 @@ public interface IAuthService
     /// Change user's email (requires current password)
     /// </summary>
     Task<IResult> ChangeEmailAsync(Guid userId, ChangeEmailDto changeEmailDto, string ipAddress, string userAgent, CancellationToken cancellationToken = default);
+    
+    // Two-Factor Authentication
+    /// <summary>
+    /// Setup 2FA for user - generates secret key and QR code
+    /// </summary>
+    Task<IDataResult<TwoFactorSetupDto>> SetupTwoFactorAsync(Guid userId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Enable 2FA for user after verification
+    /// </summary>
+    Task<IResult> EnableTwoFactorAsync(Guid userId, TwoFactorToggleDto dto, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Disable 2FA for user
+    /// </summary>
+    Task<IResult> DisableTwoFactorAsync(Guid userId, TwoFactorToggleDto dto, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get user's 2FA status
+    /// </summary>
+    Task<IDataResult<TwoFactorStatusDto>> GetTwoFactorStatusAsync(Guid userId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Complete 2FA login flow
+    /// </summary>
+    Task<IDataResult<TokenDto>> VerifyTwoFactorAsync(TwoFactorLoginDto dto, string ipAddress, string userAgent, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Generate new backup codes for 2FA
+    /// </summary>
+    Task<IDataResult<List<string>>> GenerateNewBackupCodesAsync(Guid userId, string currentPassword, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Resend 2FA setup (same secret key if exists, new if not)
+    /// </summary>
+    Task<IDataResult<TwoFactorSetupDto>> ResendTwoFactorSetupAsync(Guid userId, bool forceNew = false, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Resend temp token for 2FA login (with credentials verification)
+    /// </summary>
+    Task<IDataResult<TokenDto>> ResendTempTokenAsync(UserLoginDto dto, string ipAddress, string userAgent, CancellationToken cancellationToken = default);
 }

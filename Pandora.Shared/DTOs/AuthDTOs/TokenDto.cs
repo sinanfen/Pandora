@@ -29,6 +29,10 @@ public class TokenDto
     /// Token type (always "Bearer")
     /// </summary>
     public string TokenType { get; set; } = "Bearer";
+    
+    // 2FA Support
+    public bool RequiresTwoFactor { get; set; }
+    public string? TempToken { get; set; } // Used for 2FA flow
 }
 
 /// <summary>

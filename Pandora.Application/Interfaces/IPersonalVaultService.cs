@@ -24,11 +24,13 @@ CancellationToken cancellationToken = default);
       bool withDeleted = false,
       bool enableTracking = true,
       CancellationToken cancellationToken = default);
-    Task<IDataResult<PersonalVaultDto>> AddAsync(PersonalVaultAddDto dto, CancellationToken cancellationToken);
-    Task<IDataResult<PersonalVaultDto>> UpdateAsync(PersonalVaultUpdateDto dto, CancellationToken cancellationToken);
+    Task<IDataResult<PersonalVaultDto>> AddAsync(PersonalVaultAddDto dto, Guid userId, CancellationToken cancellationToken);
+    Task<IDataResult<PersonalVaultDto>> UpdateAsync(PersonalVaultUpdateDto dto, Guid userId, CancellationToken cancellationToken);
     Task<IResult> DeleteAsync(Guid personalVaultId, CancellationToken cancellationToken);
     Task<PersonalVaultDto> GetByIdAsync(Guid personalVaultId, CancellationToken cancellationToken);
     Task<IDataResult<PersonalVaultDto>> GetByIdAndUserAsync(Guid personalVaultId, Guid userId, CancellationToken cancellationToken);
     Task<List<PersonalVaultDto>> GetAllAsync(CancellationToken cancellationToken, bool withDeleted = false);
     Task<List<PersonalVaultDto>> GetAllByUserAsync(Guid userId, CancellationToken cancellationToken, bool withDeleted = false);
+    // Time Capsule Methods
+    Task<IDataResult<string>> GenerateShareLinkAsync(Guid personalVaultId, Guid userId, CancellationToken cancellationToken);
 }

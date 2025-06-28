@@ -73,7 +73,8 @@ public class CategoriesController : ControllerBase
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
-        var result = await _categoryService.AddAsync(categoryAddDto, cancellationToken);
+        var userId = GetLoggedInUserId(); // JWT token'dan kullanıcı ID'sini al
+        var result = await _categoryService.AddAsync(categoryAddDto, userId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result);
@@ -92,10 +93,7 @@ public class CategoriesController : ControllerBase
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
         var userId = GetLoggedInUserId(); // JWT'den kullanıcı kimliği al
-        var categoryDto = await _categoryService.GetByIdAsync(categoryUpdateDto.Id, cancellationToken);
-        if (categoryDto == null || categoryDto.UserId != userId)
-            return Unauthorized("This category cannot be updated.");
-        var result = await _categoryService.UpdateAsync(categoryUpdateDto, cancellationToken);
+        var result = await _categoryService.UpdateAsync(categoryUpdateDto, userId, cancellationToken);
         if (result.ResultStatus != ResultStatus.Success)
             return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
         return Ok(result); // 200 OK

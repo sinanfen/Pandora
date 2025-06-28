@@ -6,8 +6,6 @@ namespace Pandora.Shared.DTOs.PersonalVaultDTOs;
 
 public class PersonalVaultUpdateDto : BaseDto<Guid>, IPersonalVaultDto
 {
-    // User details
-    public Guid UserId { get; set; }
     // Box content
     public string Title { get; set; }  // Box title (e.g., "Links to Watch Later")
     public string Content { get; set; }  // Unencrypted content (to be AES-encrypted)

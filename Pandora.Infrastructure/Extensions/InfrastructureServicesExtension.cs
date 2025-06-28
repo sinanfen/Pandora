@@ -5,6 +5,7 @@ using Pandora.Application.Interfaces.Security;
 using Pandora.Application.Security;
 using Pandora.Infrastructure.Repositories;
 using Pandora.Infrastructure.Services;
+using Pandora.Infrastructure.Security;
 
 namespace Pandora.Infrastructure.Extensions;
 
@@ -28,6 +29,10 @@ public static class InfrastructureServicesExtension
         var aesKey = AESEnvironmentHelper.GetOrCreateAesKey();
         services.AddSingleton<IHasher>(new SecurityService(aesKey));
         services.AddSingleton<IEncryption>(new SecurityService(aesKey));
+        
+        // 2FA Services
+        services.AddScoped<ITwoFactorService, TwoFactorService>();
+        services.AddSingleton<ITempTokenService, TempTokenService>();
 
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();

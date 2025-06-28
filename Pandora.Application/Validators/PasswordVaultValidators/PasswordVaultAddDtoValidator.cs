@@ -7,10 +7,6 @@ public class PasswordVaultAddDtoValidator : AbstractValidator<PasswordVaultAddDt
 {
     public PasswordVaultAddDtoValidator()
     {
-        // UserId field validation
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID cannot be empty.");
-
         // SiteName field validation
         RuleFor(x => x.SiteName)
             .NotEmpty().WithMessage("Site name cannot be empty.")

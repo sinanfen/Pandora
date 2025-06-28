@@ -33,6 +33,12 @@ public class PersonalVault : Entity<Guid>
 
     public DateTime? UnlockDate { get; set; }
 
+    // Time Capsule Sharing Features
+    public bool IsShareable { get; set; } = false;  // Paylaşılabilir mi?
+    public string? ShareToken { get; set; }         // Paylaşım linki için unique token
+    public DateTime? SharedAt { get; set; }         // Ne zaman paylaşıldı
+    public int ShareViewCount { get; set; } = 0;    // Kaç kez görüntülendi
+
     // Optional category for organization
     public Guid? CategoryId { get; set; }
     public Category Category { get; set; }

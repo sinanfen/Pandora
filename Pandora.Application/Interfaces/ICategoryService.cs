@@ -24,8 +24,8 @@ public interface ICategoryService
       bool withDeleted = false,
       bool enableTracking = true,
       CancellationToken cancellationToken = default);
-    Task<IDataResult<CategoryDto>> AddAsync(CategoryAddDto dto, CancellationToken cancellationToken);
-    Task<IDataResult<CategoryDto>> UpdateAsync(CategoryUpdateDto dto, CancellationToken cancellationToken);
+    Task<IDataResult<CategoryDto>> AddAsync(CategoryAddDto dto, Guid userId, CancellationToken cancellationToken);
+    Task<IDataResult<CategoryDto>> UpdateAsync(CategoryUpdateDto dto, Guid userId, CancellationToken cancellationToken);
     Task<IResult> DeleteAsync(Guid categoryId, CancellationToken cancellationToken);
     Task<CategoryDto> GetByIdAsync(Guid categoryId, CancellationToken cancellationToken);
     Task<CategoryDto> GetByIdAndUserAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken);

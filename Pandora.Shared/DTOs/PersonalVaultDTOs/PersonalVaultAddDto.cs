@@ -6,8 +6,6 @@ namespace Pandora.Shared.DTOs.PersonalVaultDTOs;
 
 public class PersonalVaultAddDto : IPersonalVaultDto
 {
-    // User details
-    public Guid UserId { get; set; }  // The user creating the box
     // Box content
     public string Title { get; set; }  // Box title (e.g., "Links to Watch Later")
     public string Content { get; set; }  // Unencrypted content (to be AES-encrypted)
@@ -18,8 +16,9 @@ public class PersonalVaultAddDto : IPersonalVaultDto
     [Required]
     public bool IsLocked { get; set; } // Kullanıcı "kilitle" seçeneğini işaretler
     [RequiredIfTrue(nameof(IsLocked))] // Özel bir validation attribute 
-    [MinimumDateOffset(1, TimeUnit.Month)] // Özel validation (en az 1 ay sonrası)
+    [DateRangeOffset(7, TimeUnit.Day, 1, TimeUnit.Year)] // 7 gün - 1 yıl arası
     public DateTime? UnlockDate { get; set; } // Kilit açılma tarihi
+    public bool IsShareable { get; set; } = false; // Zaman kapsülü paylaşılabilir mi?
     // Category
     public Guid? CategoryId { get; set; }  // Optional category assignment
     // Metadata
