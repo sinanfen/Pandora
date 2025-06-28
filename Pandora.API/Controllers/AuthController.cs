@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Results;
+using Pandora.Shared.DTOs.AuthDTOs;
 using Pandora.Shared.DTOs.UserDTOs;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 
 namespace Pandora.API.Controllers;
 
@@ -22,38 +24,198 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Performs user login and returns a JWT token.
+    /// Get client IP address
     /// </summary>
-    /// <param name="dto">User login credentials</param>
-    /// <returns>Response containing JWT token</returns>
-    [HttpPost("login")]
-    [AllowAnonymous]
-    [EnableRateLimiting("LoginPolicy")]
-    [SwaggerOperation(Summary = "Performs user login", Description = "Logs in with email and password. Returns a JWT token.")]
-    [SwaggerResponse(200, "Login successful")]
-    [SwaggerResponse(400, "Invalid login")]
-    public async Task<IActionResult> Login(UserLoginDto dto, CancellationToken cancellationToken)
+    private string GetClientIpAddress()
     {
-        var result = await _authService.LoginAsync(dto, cancellationToken);
-        if (result.ResultStatus != ResultStatus.Success)
-            return BadRequest(new { Success = false, Message = result.Message });
-        return Ok(new { Success = true, Token = result.Data, Message = result.Message });
+        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
     }
 
     /// <summary>
-    /// Creates a new user registration.
+    /// Get client user agent
     /// </summary>
-    [HttpPost("register")]
-    [AllowAnonymous]
-    [SwaggerOperation(Summary = "New user registration", Description = "Registers a new user in the system.")]
-    [SwaggerResponse(200, "Registration successful")]
-    [SwaggerResponse(400, "Invalid information")]
-    public async Task<IActionResult> RegisterAsync(UserRegisterDto userRegisterDto, CancellationToken cancellationToken)
+    private string GetClientUserAgent()
     {
-        IDataResult<UserDto> result = await _userService.RegisterUserAsync(userRegisterDto, cancellationToken);
+        return HttpContext.Request.Headers["User-Agent"].FirstOrDefault() ?? "Unknown";
+    }
+
+    /// <summary>
+    /// Get current user ID from JWT token
+    /// </summary>
+    private Guid GetCurrentUserId()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            throw new UnauthorizedAccessException("User ID not found in token");
+        return Guid.Parse(userIdClaim.Value);
+    }
+
+    /// <summary>
+    /// User login with username/email and password
+    /// </summary>
+    /// <param name="dto">Login credentials</param>
+    /// <returns>Access token and refresh token</returns>
+    [HttpPost("login")]
+    [SwaggerOperation(Summary = "User login", Description = "Authenticate user and return access token with refresh token")]
+    [SwaggerResponse(200, "Login successful", typeof(TokenDto))]
+    [SwaggerResponse(400, "Invalid credentials")]
+    public async Task<IActionResult> LoginAsync([FromBody] UserLoginDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var ipAddress = GetClientIpAddress();
+        var userAgent = GetClientUserAgent();
+
+        var result = await _authService.LoginAsync(dto, ipAddress, userAgent, cancellationToken);
+        
         if (result.ResultStatus != ResultStatus.Success)
-            return BadRequest(new { Success = false, Message = result.Message });
-        return Ok(new { Success = true, Data = result.Data, Message = result.Message });
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Refresh access token using refresh token
+    /// </summary>
+    /// <param name="dto">Refresh token</param>
+    /// <returns>New access token and refresh token</returns>
+    [HttpPost("refresh")]
+    [SwaggerOperation(Summary = "Refresh token", Description = "Generate new access token using refresh token")]
+    [SwaggerResponse(200, "Token refreshed successfully", typeof(TokenDto))]
+    [SwaggerResponse(400, "Invalid refresh token")]
+    public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var ipAddress = GetClientIpAddress();
+        var userAgent = GetClientUserAgent();
+
+        var result = await _authService.RefreshTokenAsync(dto, ipAddress, userAgent, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Revoke a refresh token
+    /// </summary>
+    /// <param name="dto">Token to revoke</param>
+    /// <returns>Success message</returns>
+    [HttpPost("revoke")]
+    [SwaggerOperation(Summary = "Revoke token", Description = "Revoke a specific refresh token")]
+    [SwaggerResponse(200, "Token revoked successfully")]
+    [SwaggerResponse(400, "Invalid token")]
+    public async Task<IActionResult> RevokeTokenAsync([FromBody] RevokeTokenDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var result = await _authService.RevokeTokenAsync(dto, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Logout user and revoke all tokens
+    /// </summary>
+    /// <returns>Success message</returns>
+    [HttpPost("logout")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Logout", Description = "Logout user and revoke all refresh tokens")]
+    [SwaggerResponse(200, "Logged out successfully")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var result = await _authService.LogoutAsync(userId, cancellationToken);
+        
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get user's active sessions
+    /// </summary>
+    /// <param name="currentRefreshToken">Current refresh token to identify current session</param>
+    /// <returns>List of active sessions</returns>
+    [HttpGet("sessions")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Get active sessions", Description = "Get all active sessions for the current user")]
+    [SwaggerResponse(200, "Active sessions retrieved", typeof(List<SessionDto>))]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> GetActiveSessionsAsync([FromQuery] string currentRefreshToken, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var result = await _authService.GetActiveSessionsAsync(userId, currentRefreshToken, cancellationToken);
+        
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Revoke all other sessions except current
+    /// </summary>
+    /// <param name="currentRefreshToken">Current refresh token to keep active</param>
+    /// <returns>Success message</returns>
+    [HttpPost("logout-others")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Logout other sessions", Description = "Revoke all refresh tokens except the current one")]
+    [SwaggerResponse(200, "Other sessions logged out")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> LogoutOtherSessionsAsync([FromBody] string currentRefreshToken, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var result = await _authService.RevokeAllOtherSessionsAsync(userId, currentRefreshToken, cancellationToken);
+        
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Register a new user
+    /// </summary>
+    /// <param name="dto">User registration data</param>
+    /// <returns>Registration result</returns>
+    [HttpPost("register")]
+    [SwaggerOperation(Summary = "Register user", Description = "Register a new user account")]
+    [SwaggerResponse(200, "User registered successfully")]
+    [SwaggerResponse(400, "Registration failed")]
+    public async Task<IActionResult> RegisterAsync([FromBody] UserRegisterDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var result = await _userService.RegisterUserAsync(dto, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        // Send email verification after successful registration
+        try
+        {
+            var ipAddress = GetClientIpAddress();
+            var userAgent = GetClientUserAgent();
+            
+            await _authService.SendEmailVerificationAsync(dto.Email, ipAddress, userAgent, cancellationToken);
+            
+            return Ok(new { 
+                Result = result.ResultStatus, 
+                Message = "User successfully registered. Please check your email for verification instructions.",
+                Data = result.Data 
+            });
+        }
+        catch (Exception)
+        {
+            return Ok(new { 
+                Result = result.ResultStatus, 
+                Message = "User successfully registered, but verification email could not be sent. Please request a new verification email.",
+                Data = result.Data 
+            });
+        }
     }
 
     /// <summary>
@@ -85,11 +247,103 @@ public class AuthController : ControllerBase
         try
         {
             var principal = _authService.GetPrincipalFromExpiredToken(token);
-            return Ok(new { Message = "Token geçerli", User = principal.Identity.Name });
+            return Ok(new { Message = "Token is valid", User = principal.Identity.Name });
         }
         catch (Exception ex)
         {
-            return Unauthorized(new { Message = "Token geçersiz", Error = ex.Message });
+            return Unauthorized(new { Message = "Invalid token", Error = ex.Message });
         }
+    }
+
+    /// <summary>
+    /// Verify email address with token
+    /// </summary>
+    [HttpPost("verify-email")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Verify email address", Description = "Verifies user's email address using the verification token.")]
+    [SwaggerResponse(200, "Email verified successfully")]
+    [SwaggerResponse(400, "Invalid or expired token")]
+    public async Task<IActionResult> VerifyEmailAsync([FromBody] EmailVerificationDto emailVerificationDto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var result = await _authService.VerifyEmailAsync(emailVerificationDto, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Resend email verification
+    /// </summary>
+    [HttpPost("resend-verification")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Resend verification email", Description = "Resends verification email to the specified address.")]
+    [SwaggerResponse(200, "Verification email sent")]
+    [SwaggerResponse(400, "Invalid email or already verified")]
+    public async Task<IActionResult> ResendEmailVerificationAsync([FromBody] ResendEmailVerificationDto resendEmailDto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var ipAddress = GetClientIpAddress();
+        var userAgent = GetClientUserAgent();
+
+        var result = await _authService.ResendEmailVerificationAsync(resendEmailDto, ipAddress, userAgent, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Check email verification status
+    /// </summary>
+    [HttpGet("email-status")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Check email verification status", Description = "Checks if an email address is verified.")]
+    [SwaggerResponse(200, "Email status retrieved")]
+    [SwaggerResponse(404, "User not found")]
+    public async Task<IActionResult> CheckEmailStatusAsync([FromQuery] string email, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(email))
+            return BadRequest("Email parameter is required");
+
+        var result = await _authService.IsEmailVerifiedAsync(email, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return NotFound(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(new { Email = email, IsVerified = result.Data });
+    }
+
+    /// <summary>
+    /// Change user's email address
+    /// </summary>
+    [HttpPost("change-email")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Change email address", Description = "Changes user's email address. Requires current password for security.")]
+    [SwaggerResponse(200, "Email changed successfully")]
+    [SwaggerResponse(400, "Invalid input or password")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> ChangeEmailAsync([FromBody] ChangeEmailDto changeEmailDto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var userId = GetCurrentUserId();
+        var ipAddress = GetClientIpAddress();
+        var userAgent = GetClientUserAgent();
+
+        var result = await _authService.ChangeEmailAsync(userId, changeEmailDto, ipAddress, userAgent, cancellationToken);
+        
+        if (result.ResultStatus != ResultStatus.Success)
+            return BadRequest(new { Result = result.ResultStatus, Message = result.Message });
+
+        return Ok(result);
     }
 }
