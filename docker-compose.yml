@@ -1,0 +1,98 @@
+services:
+  # PostgreSQL Database Service
+  pandora-db:
+    image: postgres:15-alpine
+    container_name: pandora-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: PandoraBox
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pandora_postgres_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - pandora-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d PandoraBox"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Pandora API Service
+  pandora-api:
+    build:
+      context: .
+      dockerfile: Pandora.API/Dockerfile
+    container_name: pandora-api
+    restart: unless-stopped
+    depends_on:
+      pandora-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PandoraBoxDatabase: "Host=pandora-db;Port=5432;Database=PandoraBox;Username=postgres;Password=postgres;Include Error Detail=true"
+      JwtSettings__SecretKey: "MySecretKey12345MySecretKey12345MySecretKey12345MySecretKey12345MySecretKey12345"
+      JwtSettings__Issuer: "Pandora.API"
+      JwtSettings__Audience: "Pandora.Users"
+      JwtSettings__ExpiresInMinutes: "15"
+      JwtSettings__RefreshTokenExpiryInDays: "30"
+      Email__SMTP__Host: "smtp.gmail.com"
+      Email__SMTP__Port: "587"
+      Email__SMTP__EnableSsl: "true"
+      Email__SMTP__Username: "info.cnonestudio@gmail.com"
+      Email__SMTP__Password: "peayjbkepoezgrlc"
+      Email__SMTP__FromEmail: "info.cnonestudio@gmail.com"
+      Email__SMTP__FromName: "Pandora Team"
+      BaseUrl: "http://localhost:8080"
+      Serilog__WriteTo__2__Args__connectionString: "Host=pandora-db;Port=5432;Database=PandoraBox;Username=postgres;Password=postgres;Include Error Detail=true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - pandora_logs:/app/Logs
+    networks:
+      - pandora-network
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # pgAdmin (Optional - for database management)
+  pandora-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pandora-pgadmin
+    restart: unless-stopped
+    depends_on:
+      - pandora-db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pandora.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pandora_pgadmin_data:/var/lib/pgadmin
+    networks:
+      - pandora-network
+    profiles:
+      - admin # Optional service - use 'docker-compose --profile admin up' to include
+
+volumes:
+  pandora_postgres_data:
+    driver: local
+  pandora_logs:
+    driver: local
+  pandora_pgadmin_data:
+    driver: local
+
+networks:
+  pandora-network:
+    driver: bridge
+    name: pandora-network 
