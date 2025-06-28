@@ -362,3 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Pandora.API/Logs/log-20240929.txt
+
+# Environment files (contain sensitive data)
+.env
+.env.local
+.env.production
+.env.staging
