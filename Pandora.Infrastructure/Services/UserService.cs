@@ -89,10 +89,10 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+            var user = await _userRepository.GetAsync(u => u.NormalizedEmail == email.ToUpperInvariant(), cancellationToken: cancellationToken);
             if (user == null)
             {
-                _logger.LogWarning("Kullanıcı bulunamadı: {Email}", email);
+                _logger.LogWarning("User not found: {Email}", email);
                 return null;
             }
 
@@ -100,8 +100,8 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {MethodName}. Failed to get user by email {Email}. Details: {ExceptionMessage}", nameof(GetEntityByEmailAsync), email, ex.Message);
-            throw new Exception("Kullanıcı bilgisi alınırken hata oluştu.", ex);
+            _logger.LogError(ex, "Error in {MethodName}. Failed to get user information. Details: {ExceptionMessage}", nameof(GetEntityByEmailAsync), ex.Message);
+            throw new Exception("Error occurred while retrieving user information.", ex);
         }
     }
 
@@ -109,19 +109,18 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
+            var user = await _userRepository.GetAsync(u => u.NormalizedUsername == username.ToUpperInvariant(), cancellationToken: cancellationToken);
             if (user == null)
             {
-                _logger.LogWarning("Kullanıcı bulunamadı: {Username}", username);
+                _logger.LogWarning("User not found: {Username}", username);
                 return null;
             }
-
             return user;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {MethodName}. Failed to get user by username {Username}. Details: {ExceptionMessage}", nameof(GetEntityByUsernameAsync), username, ex.Message);
-            throw new Exception("Kullanıcı bilgisi alınırken hata oluştu.", ex);
+            throw new Exception("Error occurred while retrieving user information.", ex);
         }
     }
 
@@ -136,21 +135,24 @@ public class UserService : IUserService
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)), null);
             }
 
-            await _userBusinessRules.UserNameCannotBeDuplicatedWhenInserted(dto.Username);
-            await _userBusinessRules.EmailCannotBeDuplicatedWhenInserted(dto.Email);
+            await _userBusinessRules.UsernameCannotBeDuplicatedWhenRegistering(dto.Username);
+            await _userBusinessRules.EmailCannotBeDuplicatedWhenRegistering(dto.Email);
 
             var user = _mapper.Map<User>(dto);
 
             user.NormalizedUsername = dto.Username.ToUpperInvariant();
             user.NormalizedEmail = dto.Email.ToUpperInvariant();
             user.SecurityStamp = Guid.NewGuid().ToString();
+            user.EmailConfirmed = false; // Email verification required
 
             user.PasswordHash = _hasher.HashPassword(dto.Password, HashAlgorithmType.Sha512);
 
             await _userRepository.AddAsync(user, cancellationToken);
 
-            // Başarılı sonuç
-            return new DataResult<UserDto>(ResultStatus.Success, "Kullanıcı başarıyla kaydedildi.", _mapper.Map<UserDto>(user));
+            // Başarılı sonuç - Email verification will be handled separately
+            return new DataResult<UserDto>(ResultStatus.Success, 
+                "User successfully registered. Please verify your email address to complete registration.", 
+                _mapper.Map<UserDto>(user));
         }
         catch (Exception ex)
         {
@@ -186,17 +188,17 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<Pandora.Application.Interfaces.Results.IResult> DeleteAsync(Guid userId, CancellationToken cancellationToken)
     {
         try
         {
             User? user = await _userRepository.GetAsync(x => x.Id == userId, cancellationToken: cancellationToken);
             if (user == null)
             {
-                return new Result(ResultStatus.Warning, "Kullanıcı bulunamadı.");
+                return new Result(ResultStatus.Warning, "User not found.");
             }
             await _userRepository.DeleteAsync(user, cancellationToken: cancellationToken);
-            return new Result(ResultStatus.Success, "Kullanıcı başarıyla silindi.");
+            return new Result(ResultStatus.Success, "User successfully deleted.");
         }
         catch (Exception ex)
         {
@@ -280,37 +282,39 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<IResult> ChangePasswordAsync(UserPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken)
+    public async Task<Pandora.Application.Interfaces.Results.IResult> ChangePasswordAsync(UserPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken)
     {
         try
         {
             var validationResult = await _userPasswordChangeDtoValidator.ValidateAsync(userPasswordChangeDto);
             if (!validationResult.IsValid)
-                return new Result(ResultStatus.Error, "Doğrulama hatası: " + string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
+            {
+                return new Result(ResultStatus.Error, "Validation error: " + string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
+            }
 
             var user = await _userRepository.GetAsync(u => u.Id == userPasswordChangeDto.Id, cancellationToken: cancellationToken);
             if (user == null)
-                return new Result(ResultStatus.Error, "Kullanıcı bulunamadı.");
+            {
+                return new Result(ResultStatus.Error, "User not found.");
+            }
 
-            var isCurrentPasswordValid = _userBusinessRules.EnsureCurrentPasswordIsCorrect(userPasswordChangeDto.CurrentPassword, user.PasswordHash, _hasher);
-            if (!isCurrentPasswordValid)
-                return new Result(ResultStatus.Error, "Mevcut şifre geçersiz.");
+            if (!_hasher.VerifyHashedPassword(user.PasswordHash, userPasswordChangeDto.CurrentPassword, HashAlgorithmType.Sha512))
+            {
+                return new Result(ResultStatus.Error, "Current password is invalid.");
+            }
 
-            // Check password complexity
-            _userBusinessRules.EnsurePasswordMeetsComplexityRules(userPasswordChangeDto.NewPassword);
-
+            // Hash new password and update
             user.PasswordHash = _hasher.HashPassword(userPasswordChangeDto.NewPassword, HashAlgorithmType.Sha512);
-
             user.LastPasswordChangeDate = DateTime.UtcNow;
 
             await _userRepository.UpdateAsync(user, cancellationToken);
 
-            return new Result(ResultStatus.Success, "Şifre başarıyla değiştirildi.");
+            return new Result(ResultStatus.Success, "Password successfully changed.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while changing password for user ID {UserId}: {ExceptionMessage}", userPasswordChangeDto.Id, ex.Message);
-            return new Result(ResultStatus.Error, "Şifre değiştirilirken bir hata oluştu.");
+            _logger.LogError(ex, "Error in {MethodName}. Failed to change password. Details: {ExceptionMessage}", nameof(ChangePasswordAsync), ex.Message);
+            return new Result(ResultStatus.Error, "An error occurred while changing the password.");
         }
     }
 }
