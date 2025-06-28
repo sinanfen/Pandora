@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pandora.Core.Domain.Entities;
+using Pandora.Infrastructure.Data.Configurations;
 using System.Reflection;
 
 // Infrastructure/Data/PandoraDbContext.cs
@@ -15,13 +16,22 @@ public class PandoraDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<PasswordVault> passwordVaults { get; set; }
     public DbSet<PersonalVault> PersonalVaults { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         try
         {
-            // Automatically apply all configurations from the current assembly
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            // Apply all entity configurations
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
+            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new PasswordVaultConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonalVaultConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new EmailVerificationTokenConfiguration());
             base.OnModelCreating(modelBuilder);
         }
         catch (Exception ex)

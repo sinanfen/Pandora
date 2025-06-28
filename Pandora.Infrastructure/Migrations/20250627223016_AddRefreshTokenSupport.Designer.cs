@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pandora.Infrastructure.Data.Contexts;
@@ -11,9 +12,11 @@ using Pandora.Infrastructure.Data.Contexts;
 namespace Pandora.Infrastructure.Migrations
 {
     [DbContext(typeof(PandoraDbContext))]
-    partial class PandoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627223016_AddRefreshTokenSupport")]
+    partial class AddRefreshTokenSupport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,76 +66,6 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Categories", (string)null);
-                });
-
-            modelBuilder.Entity("Pandora.Core.Domain.Entities.EmailVerificationToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("character varying(254)")
-                        .HasComment("Email address to be verified");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("When this token expires");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)")
-                        .HasComment("IP address when token was created");
-
-                    b.Property<bool>("IsUsed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasComment("Whether this token has been used");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasComment("Cryptographically secure verification token");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasComment("User agent when token was requested");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .HasDatabaseName("IX_EmailVerificationTokens_Email");
-
-                    b.HasIndex("ExpiresAt")
-                        .HasDatabaseName("IX_EmailVerificationTokens_ExpiresAt");
-
-                    b.HasIndex("Token")
-                        .IsUnique()
-                        .HasDatabaseName("IX_EmailVerificationTokens_Token");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_EmailVerificationTokens_UserId");
-
-                    b.HasIndex("IpAddress", "CreatedDate")
-                        .HasDatabaseName("IX_EmailVerificationTokens_IpAddress_CreatedDate");
-
-                    b.ToTable("EmailVerificationTokens", (string)null);
                 });
 
             modelBuilder.Entity("Pandora.Core.Domain.Entities.PasswordVault", b =>
@@ -372,15 +305,15 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("604feb50-ece3-4b4c-9f2d-33d61245943c"),
-                            CreatedDate = new DateTime(2025, 6, 27, 23, 44, 42, 204, DateTimeKind.Utc).AddTicks(2381),
+                            Id = new Guid("a1fdfc88-6f1d-4128-b82b-1e2e9d071525"),
+                            CreatedDate = new DateTime(2025, 6, 27, 22, 30, 16, 61, DateTimeKind.Utc).AddTicks(4348),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("a41ec15a-e04f-461a-8a48-13bd933b86fb"),
-                            CreatedDate = new DateTime(2025, 6, 27, 23, 44, 42, 204, DateTimeKind.Utc).AddTicks(2391),
+                            Id = new Guid("001ccad5-a952-4228-baa0-c117f081271e"),
+                            CreatedDate = new DateTime(2025, 6, 27, 22, 30, 16, 61, DateTimeKind.Utc).AddTicks(4353),
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -481,12 +414,12 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("593a6bb4-3ecd-49e5-8af0-474d65f13f6e"),
-                            CreatedDate = new DateTime(2025, 6, 27, 23, 44, 42, 204, DateTimeKind.Utc).AddTicks(5582),
+                            Id = new Guid("dcd3e9de-a90c-424a-a8fd-80729bd101e0"),
+                            CreatedDate = new DateTime(2025, 6, 27, 22, 30, 16, 61, DateTimeKind.Utc).AddTicks(7763),
                             Email = "admin@example.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
-                            LastLoginDate = new DateTime(2025, 6, 27, 23, 44, 42, 204, DateTimeKind.Utc).AddTicks(6036),
+                            LastLoginDate = new DateTime(2025, 6, 27, 22, 30, 16, 61, DateTimeKind.Utc).AddTicks(8141),
                             LastName = "Admin",
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
@@ -494,18 +427,18 @@ namespace Pandora.Infrastructure.Migrations
                             PasswordHash = "d48a3b22dbfe455ae3438f7d89eb62875ddfc2234d2acc6f32132385d049f65752a5858dbb19006ff4882134264607869639798e06ec48928997f72c4ed31be5",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "08dc05cf-2888-45b4-b607-09d83fc2eed6",
+                            SecurityStamp = "246dd9b7-f921-4e80-bbfe-109344249cfd",
                             TwoFactorEnabled = false,
                             Username = "admin"
                         },
                         new
                         {
-                            Id = new Guid("83c4a9ce-a96a-49d2-9c10-39ceff3f8b45"),
-                            CreatedDate = new DateTime(2025, 6, 27, 23, 44, 42, 204, DateTimeKind.Utc).AddTicks(6039),
+                            Id = new Guid("af8ee61f-1ba3-42ad-93c9-2aeb2ad490e5"),
+                            CreatedDate = new DateTime(2025, 6, 27, 22, 30, 16, 61, DateTimeKind.Utc).AddTicks(8144),
                             Email = "user@example.com",
                             EmailConfirmed = true,
                             FirstName = "User",
-                            LastLoginDate = new DateTime(2025, 6, 27, 23, 44, 42, 204, DateTimeKind.Utc).AddTicks(6088),
+                            LastLoginDate = new DateTime(2025, 6, 27, 22, 30, 16, 61, DateTimeKind.Utc).AddTicks(8191),
                             LastName = "User",
                             LockoutEnabled = false,
                             NormalizedEmail = "USER@EXAMPLE.COM",
@@ -513,7 +446,7 @@ namespace Pandora.Infrastructure.Migrations
                             PasswordHash = "e86424a11261f6897e28276662338ebfd4b3230c1295647590ab8c510fd1557355b92fc9051296f7ac5c331a52fa5c2d22cf76c2fc61fcbd436a317e02bf53b3",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "9cb64608-bc0c-44c3-bec4-167e791c6a5c",
+                            SecurityStamp = "df958d44-0c60-42f4-aedd-83d1c7de4c74",
                             TwoFactorEnabled = false,
                             Username = "user"
                         });
@@ -536,13 +469,13 @@ namespace Pandora.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("593a6bb4-3ecd-49e5-8af0-474d65f13f6e"),
-                            RoleId = new Guid("604feb50-ece3-4b4c-9f2d-33d61245943c")
+                            UserId = new Guid("dcd3e9de-a90c-424a-a8fd-80729bd101e0"),
+                            RoleId = new Guid("a1fdfc88-6f1d-4128-b82b-1e2e9d071525")
                         },
                         new
                         {
-                            UserId = new Guid("83c4a9ce-a96a-49d2-9c10-39ceff3f8b45"),
-                            RoleId = new Guid("a41ec15a-e04f-461a-8a48-13bd933b86fb")
+                            UserId = new Guid("af8ee61f-1ba3-42ad-93c9-2aeb2ad490e5"),
+                            RoleId = new Guid("001ccad5-a952-4228-baa0-c117f081271e")
                         });
                 });
 
@@ -550,17 +483,6 @@ namespace Pandora.Infrastructure.Migrations
                 {
                     b.HasOne("Pandora.Core.Domain.Entities.User", "User")
                         .WithMany("Categories")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Pandora.Core.Domain.Entities.EmailVerificationToken", b =>
-                {
-                    b.HasOne("Pandora.Core.Domain.Entities.User", "User")
-                        .WithMany("EmailVerificationTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -649,8 +571,6 @@ namespace Pandora.Infrastructure.Migrations
             modelBuilder.Entity("Pandora.Core.Domain.Entities.User", b =>
                 {
                     b.Navigation("Categories");
-
-                    b.Navigation("EmailVerificationTokens");
 
                     b.Navigation("PasswordVaults");
 
