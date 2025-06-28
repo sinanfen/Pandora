@@ -46,7 +46,7 @@ services:
       Email__SMTP__Port: "587"
       Email__SMTP__EnableSsl: "true"
       Email__SMTP__Username: "info.cnonestudio@gmail.com"
-      Email__SMTP__Password: "peayjbkepoezgrlc"
+      Email__SMTP__Password: "${PANDORA_GMAIL_PASSWORD}"
       Email__SMTP__FromEmail: "info.cnonestudio@gmail.com"
       Email__SMTP__FromName: "Pandora Team"
       BaseUrl: "http://localhost:8080"
