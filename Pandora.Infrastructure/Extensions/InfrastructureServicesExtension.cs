@@ -12,13 +12,17 @@ public static class InfrastructureServicesExtension
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
-        // Services
-        services.AddScoped<IAuthService, AuthService>();
+        // Register services
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IPasswordVaultService, PasswordVaultService>();
         services.AddScoped<IPersonalVaultService, PersonalVaultService>();
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IEmailService, EmailService>();
+
+        // Register background services
+        services.AddHostedService<TokenCleanupService>();
 
         // AESService için Key ve IV kontrolü
         var aesKey = AESEnvironmentHelper.GetOrCreateAesKey();
@@ -31,6 +35,8 @@ public static class InfrastructureServicesExtension
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IPasswordVaultRepository, PasswordVaultRepository>();
         services.AddScoped<IPersonalVaultRepository, PersonalVaultRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
 
         return services;
     }

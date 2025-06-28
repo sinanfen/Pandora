@@ -35,7 +35,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero // Token süresi tam dolduðunda geçersiz olur
+        ClockSkew = TimeSpan.Zero // Token sÃ¼resi tam dolduÄŸunda geÃ§ersiz olur
     };
 });
 
@@ -66,9 +66,9 @@ builder.Services.AddSwaggerGen(c =>
             Description = "Pandora API"
         });
 
-    c.EnableAnnotations(); //Swagger açýklama desteði
+    c.EnableAnnotations(); //Swagger aÃ§Ä±klama desteÄŸi
 
-    // JWT Bearer token için Swagger ayarlarý
+    // JWT Bearer token iÃ§in Swagger ayarlarÄ±
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -125,6 +125,9 @@ builder.Services.AddRateLimiter(options =>
         options.QueueLimit = 0;
     });
 });
+
+// HttpContextAccessor for accessing HTTP context in services
+builder.Services.AddHttpContextAccessor();
 
 // Later in the pipeline
 
@@ -202,7 +205,7 @@ if (app.Environment.IsDevelopment())
 {
   
 }
-//Geçici olarak her durumda swagger çalýþacak.
+//GeÃ§ici olarak her durumda swagger Ã§alÄ±ÅŸacak.
 app.UseSwagger(c =>
 {
     c.RouteTemplate = "swagger/{documentName}/swagger.json";
