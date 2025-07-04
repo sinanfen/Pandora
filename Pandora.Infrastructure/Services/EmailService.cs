@@ -22,9 +22,9 @@ public class EmailService : IEmailService
     {
         var subject = "🔐 Pandora - Email Adresinizi Doğrulayın";
         var verificationUrl = $"{_configuration["AppSettings:BaseUrl"]}/auth/verify-email?token={verificationToken}";
-        
+
         var htmlBody = GetEmailVerificationTemplate(userName, verificationUrl);
-        
+
         return await SendEmailAsync(toEmail, subject, htmlBody, cancellationToken);
     }
 
@@ -32,9 +32,9 @@ public class EmailService : IEmailService
     {
         var subject = "🔑 Pandora - Şifre Sıfırlama Talebi";
         var resetUrl = $"{_configuration["AppSettings:BaseUrl"]}/auth/reset-password?token={resetToken}";
-        
+
         var htmlBody = GetPasswordResetTemplate(userName, resetUrl);
-        
+
         return await SendEmailAsync(toEmail, subject, htmlBody, cancellationToken);
     }
 
@@ -42,7 +42,7 @@ public class EmailService : IEmailService
     {
         var subject = "🚨 Pandora - Güvenlik Uyarısı";
         var htmlBody = GetSecurityAlertTemplate(userName, alertMessage);
-        
+
         return await SendEmailAsync(toEmail, subject, htmlBody, cancellationToken);
     }
 
@@ -50,7 +50,7 @@ public class EmailService : IEmailService
     {
         var subject = "🎉 Pandora'ya Hoş Geldiniz!";
         var htmlBody = GetWelcomeTemplate(userName);
-        
+
         return await SendEmailAsync(toEmail, subject, htmlBody, cancellationToken);
     }
 
@@ -66,10 +66,15 @@ public class EmailService : IEmailService
             var fromEmail = _configuration["Email:SMTP:FromEmail"];
             var fromName = _configuration["Email:SMTP:FromName"];
 
+            _logger.LogInformation("Sending email to {Email} with subject {Subject}", toEmail, subject);
+            _logger.LogInformation("SMTP Host: {Host}, Port: {Port}, SSL: {EnableSsl}, Username: {Username}, Password: {Password}, FromEmail: {FromEmail}, FromName: {FromName}",
+                smtpHost, smtpPort, enableSsl, username, password, fromEmail, fromName);
+
             using var client = new SmtpClient(smtpHost, smtpPort)
             {
                 Credentials = new NetworkCredential(username, password),
-                EnableSsl = enableSsl
+                EnableSsl = enableSsl,
+                UseDefaultCredentials = false
             };
 
             var mailMessage = new MailMessage
@@ -85,7 +90,7 @@ public class EmailService : IEmailService
             mailMessage.To.Add(toEmail);
 
             await client.SendMailAsync(mailMessage, cancellationToken);
-            
+
             _logger.LogInformation("Email sent successfully to {Email} with subject {Subject}", toEmail, subject);
             return true;
         }
@@ -244,4 +249,4 @@ public class EmailService : IEmailService
 </body>
 </html>";
     }
-} 
+}

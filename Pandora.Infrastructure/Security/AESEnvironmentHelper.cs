@@ -1,40 +1,27 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 
-namespace Pandora.Application.Security;
-
-public static class AESEnvironmentHelper
+namespace Pandora.Infrastructure.Security
 {
-    public static string GetOrCreateAesKey()
+    public static class AESEnvironmentHelper
     {
-        // Ortam değişkenlerinden Key'i al
-        var key = Environment.GetEnvironmentVariable("AES_KEY");
-
-        // Eğer Key yoksa, yeni bir tane oluştur ve ortam değişkenine kaydet
-        if (string.IsNullOrEmpty(key))
+        public static string GetAesKey(IConfiguration configuration)
         {
-            key = GenerateRandomKey();
-            Environment.SetEnvironmentVariable("AES_KEY", key);
-        }
-        // Anahtar uzunluğunu runtime'da kontrol et
-        try
-        {
-            var keyBytes = Convert.FromBase64String(key);
-            if (keyBytes.Length != 32)
-                throw new InvalidOperationException("AES_KEY 32 bayt (256 bit) olmalıdır.");
-        }
-        catch (FormatException)
-        {
-            throw new InvalidOperationException("AES_KEY geçerli Base64 formatında değil.");
-        }
+            // Öncelik: appsettings.json'daki TestAesKey
+            var key = configuration["TestAesKey"];
+            if (!string.IsNullOrEmpty(key))
+                return key;
 
-        return key;
-    }
+            // Gelişmiş: environment variable veya dosya
+            var keyFile = Environment.GetEnvironmentVariable("PANDORA_AES_KEY_FILE");
+            if (!string.IsNullOrEmpty(keyFile) && System.IO.File.Exists(keyFile))
+                return System.IO.File.ReadAllText(keyFile).Trim();
 
-    private static string GenerateRandomKey()
-    {
-        using var rng = RandomNumberGenerator.Create(); // Kriptografik RNG kullan
-        byte[] key = new byte[32]; // 256 bit
-        rng.GetBytes(key);
-        return Convert.ToBase64String(key);
+            var envKey = Environment.GetEnvironmentVariable("PANDORA_AES_KEY");
+            if (!string.IsNullOrEmpty(envKey))
+                return envKey;
+
+            throw new InvalidOperationException("AES key is not set. Please set TestAesKey in appsettings.json or use PANDORA_AES_KEY(_FILE).");
+        }
     }
 }

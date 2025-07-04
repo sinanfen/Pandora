@@ -49,7 +49,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddInfrastructureServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 //builder.Services.AddCoreServices();
 //builder.Services.AddCrossCuttingConcernsServices();

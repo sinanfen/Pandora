@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Repositories;
 using Pandora.Application.Interfaces.Security;
@@ -11,7 +12,7 @@ namespace Pandora.Infrastructure.Extensions;
 
 public static class InfrastructureServicesExtension
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Register services
         services.AddScoped<IUserService, UserService>();
@@ -26,7 +27,7 @@ public static class InfrastructureServicesExtension
         services.AddHostedService<TokenCleanupService>();
 
         // AESService için Key ve IV kontrolü
-        var aesKey = AESEnvironmentHelper.GetOrCreateAesKey();
+        var aesKey = AESEnvironmentHelper.GetAesKey(configuration);
         services.AddSingleton<IHasher>(new SecurityService(aesKey));
         services.AddSingleton<IEncryption>(new SecurityService(aesKey));
         

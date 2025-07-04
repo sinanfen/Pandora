@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Pandora.Application.Interfaces;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Shared.DTOs.AuthDTOs;
