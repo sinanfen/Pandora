@@ -1,20 +1,20 @@
-using Microsoft.EntityFrameworkCore;
-using Pandora.Infrastructure.Data.Contexts;
-using Pandora.Application.Extensions;
-using Pandora.Infrastructure.Extensions;
-using Serilog;
-using Serilog.Sinks.PostgreSQL;
-using Serilog.Events;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.OpenApi.Models;
-using System.Text.Json;
-using System.Net;
-using Pandora.API.Middlewares;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Pandora.API.Middlewares;
+using Pandora.Application.Extensions;
+using Pandora.Infrastructure.Data.Contexts;
+using Pandora.Infrastructure.Extensions;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.PostgreSQL;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 

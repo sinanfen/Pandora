@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Pandora.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Pandora.Application.Interfaces.Repositories;
 using Pandora.Application.Interfaces.Security;

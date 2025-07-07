@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pandora.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Pandora.Application.Interfaces.Results;
 using Pandora.Shared.DTOs.UserDTOs;
 using Swashbuckle.AspNetCore.Annotations;

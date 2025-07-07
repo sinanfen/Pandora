@@ -393,4 +393,120 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    #region Two-Factor Authentication Endpoints
+
+    /// <summary>
+    /// 🔐 Get user's 2FA status
+    /// </summary>
+    [HttpGet("2fa/status")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Get 2FA status", Description = "Get the current two-factor authentication status for the logged-in user")]
+    [SwaggerResponse(200, "2FA status retrieved")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> GetTwoFactorStatus(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var result = await _authService.GetTwoFactorStatusAsync(userId, cancellationToken);
+        return StatusCode((int)result.ResultStatus, result);
+    }
+
+    /// <summary>
+    /// 🔧 Setup 2FA - Generate QR code and backup codes
+    /// </summary>
+    [HttpPost("2fa/setup")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Setup 2FA", Description = "Generate QR code and backup codes for two-factor authentication setup")]
+    [SwaggerResponse(200, "2FA setup generated")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> SetupTwoFactor(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var result = await _authService.SetupTwoFactorAsync(userId, cancellationToken);
+        return StatusCode((int)result.ResultStatus, result);
+    }
+
+    /// <summary>
+    /// ✅ Enable 2FA after verification
+    /// </summary>
+    [HttpPost("2fa/enable")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Enable 2FA", Description = "Enable two-factor authentication after verification")]
+    [SwaggerResponse(200, "2FA enabled successfully")]
+    [SwaggerResponse(400, "Invalid verification code or password")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> EnableTwoFactor([FromBody] TwoFactorToggleDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var userId = GetCurrentUserId();
+        var result = await _authService.EnableTwoFactorAsync(userId, dto, cancellationToken);
+        return StatusCode((int)result.ResultStatus, result);
+    }
+
+    /// <summary>
+    /// ❌ Disable 2FA
+    /// </summary>
+    [HttpPost("2fa/disable")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Disable 2FA", Description = "Disable two-factor authentication")]
+    [SwaggerResponse(200, "2FA disabled successfully")]
+    [SwaggerResponse(400, "Invalid password")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> DisableTwoFactor([FromBody] TwoFactorToggleDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var userId = GetCurrentUserId();
+        var result = await _authService.DisableTwoFactorAsync(userId, dto, cancellationToken);
+        return StatusCode((int)result.ResultStatus, result);
+    }
+
+    /// <summary>
+    /// 🔄 Generate new backup codes
+    /// </summary>
+    [HttpPost("2fa/backup-codes/regenerate")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Regenerate backup codes", Description = "Generate new backup codes for two-factor authentication")]
+    [SwaggerResponse(200, "New backup codes generated")]
+    [SwaggerResponse(400, "Invalid current password")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> RegenerateBackupCodes([FromBody] GenerateBackupCodesDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var userId = GetCurrentUserId();
+        var result = await _authService.GenerateNewBackupCodesAsync(userId, dto.CurrentPassword, cancellationToken);
+        return StatusCode((int)result.ResultStatus, result);
+    }
+
+    /// <summary>
+    /// 🔄 Resend 2FA setup (same secret if exists, new if forced)
+    /// </summary>
+    [HttpPost("2fa/setup/resend")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Resend 2FA setup", Description = "Resend two-factor authentication setup with same or new secret")]
+    [SwaggerResponse(200, "2FA setup resent")]
+    [SwaggerResponse(401, "Unauthorized")]
+    public async Task<IActionResult> ResendTwoFactorSetup([FromBody] ResendSetupDto dto, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var result = await _authService.ResendTwoFactorSetupAsync(userId, dto.ForceNew, cancellationToken);
+        return StatusCode((int)result.ResultStatus, result);
+    }
+
+    #endregion
+}
+
+public class GenerateBackupCodesDto
+{
+    public string CurrentPassword { get; set; } = string.Empty;
+}
+
+public class ResendSetupDto
+{
+    public bool ForceNew { get; set; } = false;
 }
